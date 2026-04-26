@@ -156,6 +156,11 @@
                   data-user-id="{{ u.id }}" 
                   data-user-name="{{ u.username }}" 
                   onclick="openPasswordModal(this)">Reset Password</button>
+          <button class="btn btn-ghost btn-sm"
+                  data-user-id="{{ u.id }}"
+                  data-user-name="{{ u.username }}"
+                  data-user-perm="{{ u.shopping_permission }}"
+                  onclick="openPermModal(this)">Perms</button>
         {% endif %}
         
         {% if session.user_id != u.id and u.role != 'guest' %}
@@ -266,6 +271,14 @@
           <option value="admin">System Admin</option>
         </select>
       </div>
+      <div class="form-group">
+        <label>Shopping List Access</label>
+        <select name="shopping_permission">
+          <option value="full">Full Access (Add & Remove)</option>
+          <option value="add">Add Only (Cannot Remove)</option>
+          <option value="read">Read Only (Cannot Add/Remove)</option>
+        </select>
+      </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" onclick="closeModal('modal-add-user')">Cancel</button>
         <button type="submit" class="btn btn-primary">Create Account</button>
@@ -316,6 +329,34 @@
   </div>
 </div>
 
+<!-- Permissions Modal -->
+<div id="modal-perm-user" class="base-modal-overlay hidden">
+  <div class="base-modal-box">
+    <div class="base-modal-header">
+      <h2>Edit Permissions</h2>
+      <button class="base-modal-close" onclick="closeModal('modal-perm-user')">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('admin_user_shopping') }}" class="modal-form-grid">
+      <input type="hidden" id="perm-user-id" name="user_id" />
+      <div class="form-group">
+        <label>Target User: <span id="perm-user-name" style="color: var(--color-primary);"></span></label>
+      </div>
+      <div class="form-group">
+        <label>Shopping List Access</label>
+        <select name="permission" id="perm-shopping-select">
+          <option value="full">Full Access (Add & Remove)</option>
+          <option value="add">Add Only (Cannot Remove)</option>
+          <option value="read">Read Only (Cannot Add/Remove)</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-perm-user')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Permissions</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_scripts %}
@@ -352,6 +393,16 @@
     document.getElementById('pass-user-id').value = id;
     document.getElementById('pass-user-name').textContent = name;
     openModal('modal-password-user');
+  }
+
+  function openPermModal(btn) {
+    const id = btn.dataset.userId;
+    const name = btn.dataset.userName;
+    const perm = btn.dataset.userPerm || 'full';
+    document.getElementById('perm-user-id').value = id;
+    document.getElementById('perm-user-name').textContent = name;
+    document.getElementById('perm-shopping-select').value = perm;
+    openModal('modal-perm-user');
   }
 
   // Handle overlay clicks to close modals

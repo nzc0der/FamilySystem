@@ -222,8 +222,20 @@ def init_schema() -> None:
                 author_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE SET NULL,
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS shopping_items (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_name   TEXT    NOT NULL,
+                added_by    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
             """
         )
+        
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN shopping_permission TEXT DEFAULT 'full';")
+        except sqlite3.OperationalError:
+            pass
     logger.info("Database schema verified / created.")
 
 
@@ -241,7 +253,7 @@ def get_users() -> list[dict]:
     """
     with _get_db() as conn:
         rows = conn.execute(
-            "SELECT id, username, password_hash, role, created_at FROM users ORDER BY id"
+            "SELECT id, username, password_hash, role, created_at, shopping_permission FROM users ORDER BY id"
         ).fetchall()
     return [dict(row) for row in rows]
 
@@ -250,7 +262,7 @@ def get_user_by_username(username: str) -> Optional[dict]:
     """Return a single user dict or None if not found."""
     with _get_db() as conn:
         row = conn.execute(
-            "SELECT id, username, password_hash, role, created_at FROM users WHERE username = ?",
+            "SELECT id, username, password_hash, role, created_at, shopping_permission FROM users WHERE username = ?",
             (username,),
         ).fetchone()
     return dict(row) if row else None
@@ -260,13 +272,13 @@ def get_user_by_id(user_id: int) -> Optional[dict]:
     """Return a single user dict by primary key, or None."""
     with _get_db() as conn:
         row = conn.execute(
-            "SELECT id, username, password_hash, role, created_at FROM users WHERE id = ?",
+            "SELECT id, username, password_hash, role, created_at, shopping_permission FROM users WHERE id = ?",
             (user_id,),
         ).fetchone()
     return dict(row) if row else None
 
 
-def add_user(username: str, password: Optional[str], role: str = "user") -> int:
+def add_user(username: str, password: Optional[str], role: str = "user", shopping_permission: str = "full") -> int:
     """
     Insert a new user and return the new row id.
 
@@ -278,6 +290,8 @@ def add_user(username: str, password: Optional[str], role: str = "user") -> int:
         Plain-text password.  Pass None for the guest account (no password).
     role : str
         Either "user" or "admin".  Guest uses "guest".
+    shopping_permission: str
+        "read", "add", or "full"
 
     Returns the new user id.
     Raises ValueError on duplicate username.
@@ -293,8 +307,8 @@ def add_user(username: str, password: Optional[str], role: str = "user") -> int:
 
     with _get_db() as conn:
         cursor = conn.execute(
-            "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
-            (username, password_hash, role),
+            "INSERT INTO users (username, password_hash, role, shopping_permission) VALUES (?, ?, ?, ?)",
+            (username, password_hash, role, shopping_permission),
         )
         new_id = cursor.lastrowid
 
@@ -346,6 +360,15 @@ def rename_user(user_id: int, new_username: str) -> None:
     with _get_db() as conn:
         conn.execute("UPDATE users SET username = ? WHERE id = ?", (new_username.lower().strip(), user_id))
     logger.info("User id %d renamed to '%s'.", user_id, new_username)
+
+
+def set_shopping_permission(user_id: int, permission: str) -> None:
+    """Change the shopping permission for a given user."""
+    if permission not in ("read", "add", "full"):
+        raise ValueError("Invalid permission level")
+    with _get_db() as conn:
+        conn.execute("UPDATE users SET shopping_permission = ? WHERE id = ?", (permission, user_id))
+    logger.info("User id %d shopping permission set to '%s'.", user_id, permission)
 
 
 def delete_user(user_id: int) -> None:
@@ -572,3 +595,36 @@ def delete_event(event_id: int) -> None:
     """Delete an event by id."""
     with _get_db() as conn:
         conn.execute("DELETE FROM events WHERE id = ?", (event_id,))
+
+
+# ---------------------------------------------------------------------------
+# Shopping List helpers
+# ---------------------------------------------------------------------------
+
+def get_shopping_items() -> list[dict]:
+    """Return all shopping list items."""
+    with _get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT s.id, s.item_name, s.created_at, u.username as added_by_name
+            FROM shopping_items s
+            LEFT JOIN users u ON u.id = s.added_by
+            ORDER BY s.created_at DESC
+            """
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+def add_shopping_item(item_name: str, added_by: int) -> int:
+    """Insert a new shopping item."""
+    with _get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO shopping_items (item_name, added_by) VALUES (?, ?)",
+            (item_name.strip(), added_by),
+        )
+        return cur.lastrowid
+
+def delete_shopping_item(item_id: int) -> None:
+    """Delete a shopping item by id."""
+    with _get_db() as conn:
+        conn.execute("DELETE FROM shopping_items WHERE id = ?", (item_id,))
+

@@ -172,6 +172,7 @@ def _register_routes(app: Flask) -> None:
                     session["user_id"] = guest["id"]
                     session["username"] = guest["username"]
                     session["role"] = guest["role"]
+                    session["shopping_permission"] = guest.get("shopping_permission", "read")
                     logger.info("Guest login from %s.", request.remote_addr)
                     return redirect(url_for("dashboard"))
                 flash("Guest account is not configured.", "danger")
@@ -183,6 +184,7 @@ def _register_routes(app: Flask) -> None:
                 session["user_id"] = user["id"]
                 session["username"] = user["username"]
                 session["role"] = user["role"]
+                session["shopping_permission"] = user.get("shopping_permission", "full")
                 logger.info("User '%s' logged in from %s.", username, request.remote_addr)
                 return redirect(url_for("dashboard"))
 
@@ -368,6 +370,39 @@ def _register_routes(app: Flask) -> None:
         return redirect(url_for("dashboard"))
 
     # ------------------------------------------------------------------
+    # Shopping List
+    # ------------------------------------------------------------------
+
+    @app.route("/shopping")
+    @login_required
+    def shopping():
+        items = settings.get_shopping_items()
+        return render_template("shopping.html", items=items)
+
+    @app.route("/shopping/add", methods=["POST"])
+    @login_required
+    def shopping_add():
+        if session.get("shopping_permission") == "read":
+            flash("You do not have permission to add shopping items.", "danger")
+            return redirect(url_for("shopping"))
+        
+        item_name = request.form.get("item_name", "").strip()
+        if item_name:
+            settings.add_shopping_item(item_name, session["user_id"])
+        return redirect(url_for("shopping"))
+
+    @app.route("/shopping/delete/<int:item_id>", methods=["POST"])
+    @login_required
+    def shopping_delete(item_id: int):
+        # Admin can always delete
+        if session.get("role") != "admin" and session.get("shopping_permission") in ("read", "add"):
+            flash("You do not have permission to remove shopping items.", "danger")
+            return redirect(url_for("shopping"))
+            
+        settings.delete_shopping_item(item_id)
+        return redirect(url_for("shopping"))
+
+    # ------------------------------------------------------------------
     # Profile
     # ------------------------------------------------------------------
 
@@ -418,13 +453,14 @@ def _register_routes(app: Flask) -> None:
         username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
         role = request.form.get("role", "user")
+        shopping_permission = request.form.get("shopping_permission", "full")
 
         if not username or not password:
             flash("Username and password are required.", "warning")
             return redirect(url_for("admin_panel"))
 
         try:
-            settings.add_user(username, password, role)
+            settings.add_user(username, password, role, shopping_permission)
             flash(f"User '{username}' created successfully.", "success")
         except Exception as e:
             flash(f"Error creating user: {e}", "danger")
@@ -500,6 +536,19 @@ def _register_routes(app: Flask) -> None:
             settings.delete_user(user_id)
             flash("User deleted.", "success")
         except ValueError as e:
+            flash(str(e), "danger")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/users/shopping", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_user_shopping():
+        user_id = int(request.form.get("user_id"))
+        permission = request.form.get("permission")
+        try:
+            settings.set_shopping_permission(user_id, permission)
+            flash("Shopping permission updated.", "success")
+        except Exception as e:
             flash(str(e), "danger")
         return redirect(url_for("admin_panel"))
 

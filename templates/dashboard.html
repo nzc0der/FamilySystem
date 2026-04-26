@@ -31,12 +31,16 @@
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    background: var(--color-surface-2);
-    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius);
-    padding: 0.55rem 0.75rem;
-    transition: opacity 0.2s, border-color 0.2s;
+    padding: 0.6rem 0.85rem;
+    transition: transform var(--transition), border-color var(--transition), opacity 0.2s;
     animation: slideIn 0.2s ease;
+  }
+  .todo-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-primary);
   }
 
   @keyframes slideIn {
@@ -154,12 +158,12 @@
   }
 
   .bookmark-item {
-    background: var(--color-surface-2); border: 1px solid var(--color-border);
-    border-radius: var(--radius); padding: 0.6rem; display: flex; align-items: center; gap: 0.5rem;
-    transition: transform 0.2s, border-color 0.2s; position: relative;
+    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius); padding: 0.6rem 0.8rem; display: flex; align-items: center; gap: 0.5rem;
+    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition); position: relative;
   }
   
-  .bookmark-item:hover { transform: translateY(-2px); border-color: var(--color-primary); }
+  .bookmark-item:hover { transform: translateY(-3px); border-color: var(--color-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
   .bookmark-item a { flex: 1; color: var(--color-text); font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .bookmark-item a:hover { color: var(--color-primary); }
   .bookmark-icon { font-size: 1.1rem; }

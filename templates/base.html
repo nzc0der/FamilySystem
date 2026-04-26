@@ -15,23 +15,23 @@
        Design tokens
     --------------------------------------------------------------- */
     :root {
-      --color-bg:         #0f1117;
-      --color-surface:    #1a1d27;
-      --color-surface-2:  #222639;
-      --color-border:     #2e3248;
-      --color-primary:    #6c8fff;
-      --color-primary-dk: #4f74e8;
-      --color-accent:     #a78bfa;
+      --color-bg:         #0b0c10;
+      --color-surface:    #15171e;
+      --color-surface-2:  #1f222d;
+      --color-border:     #2a2e3d;
+      --color-primary:    #82a1ff;
+      --color-primary-dk: #5a7fff;
+      --color-accent:     #b39ddb;
       --color-success:    #34d399;
       --color-warning:    #fbbf24;
       --color-danger:     #f87171;
       --color-info:       #60a5fa;
-      --color-text:       #e2e8f0;
-      --color-muted:      #8892a4;
-      --radius:           10px;
-      --radius-lg:        16px;
-      --shadow:           0 4px 24px rgba(0,0,0,0.35);
-      --transition:       0.2s ease;
+      --color-text:       #f8f9fa;
+      --color-muted:      #94a3b8;
+      --radius:           12px;
+      --radius-lg:        20px;
+      --shadow:           0 8px 32px rgba(0, 0, 0, 0.4);
+      --transition:       0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
     /* ---------------------------------------------------------------
@@ -54,17 +54,19 @@
        Navigation
     --------------------------------------------------------------- */
     nav {
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
+      background: rgba(21, 23, 30, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       padding: 0 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 60px;
+      height: 64px;
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .nav-brand {
@@ -157,11 +159,15 @@
        Cards
     --------------------------------------------------------------- */
     .card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
+      background: linear-gradient(145deg, var(--color-surface), rgba(21, 23, 30, 0.6));
+      border: 1px solid rgba(255, 255, 255, 0.05);
       border-radius: var(--radius-lg);
-      padding: 1.5rem;
+      padding: 1.75rem;
       box-shadow: var(--shadow);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     }
 
     .card-title {
@@ -364,10 +370,13 @@
        Responsive
     --------------------------------------------------------------- */
     @media (max-width: 640px) {
-      nav { padding: 0 1rem; }
-      .nav-links { gap: 0; }
+      nav { padding: 0.5rem 1rem; flex-wrap: wrap; height: auto; }
+      .nav-brand { width: 100%; justify-content: space-between; margin-bottom: 0.5rem; }
+      .nav-links { width: 100%; justify-content: center; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
       .nav-links a { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+      .nav-user { width: 100%; justify-content: center; }
       .page-wrapper { padding: 1.25rem 1rem; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
     }
 
     /* ---------------------------------------------------------------
@@ -421,6 +430,12 @@
         <a href="{{ url_for('dashboard') }}"
            class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
           Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('shopping') }}"
+           class="{% if request.endpoint == 'shopping' %}active{% endif %}">
+          Shopping List
         </a>
       </li>
       <li>
