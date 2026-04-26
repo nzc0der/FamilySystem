@@ -360,11 +360,12 @@ def _register_routes(app: Flask) -> None:
     def event_add():
         title = request.form.get("title", "").strip()
         event_date = request.form.get("event_date", "").strip()
+        end_date = request.form.get("end_date", "").strip()
         if title and event_date:
-            settings.add_event(session["user_id"], title, event_date)
+            settings.add_event(session["user_id"], title, event_date, end_date)
             flash("Event added successfully.", "success")
         else:
-            flash("Event must have a title and date.", "warning")
+            flash("Event must have a title and start date.", "warning")
         return redirect(request.referrer or url_for("dashboard"))
 
     @app.route("/events/delete/<int:event_id>", methods=["POST"])

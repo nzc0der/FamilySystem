@@ -45,12 +45,23 @@
   
   .fc-event {
     cursor: pointer;
-    background-color: rgba(108, 143, 255, 0.15);
-    border: 1px solid rgba(108, 143, 255, 0.4);
-    color: var(--color-text);
-    border-radius: 4px;
-    padding: 2px 4px;
-    font-size: 0.8rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dk));
+    border: none;
+    color: #ffffff;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .fc-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  .fc-h-event .fc-event-main {
+    color: #ffffff;
   }
   
   .fc-toolbar-title {
@@ -76,8 +87,12 @@
         <input type="text" name="title" placeholder="e.g. Soccer Practice" required />
       </div>
       <div class="form-group" style="margin-bottom: 0;">
-        <label>Date & Time</label>
+        <label>Start Date & Time</label>
         <input type="datetime-local" name="event_date" required />
+      </div>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label>End Date & Time <span class="text-muted">(Optional)</span></label>
+        <input type="datetime-local" name="end_date" />
       </div>
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Add to Calendar</button>
     </form>
@@ -121,6 +136,7 @@
         id: ev.id,
         title: ev.title + ' (by ' + (ev.author || 'unknown') + ')',
         start: ev.event_date,
+        end: ev.end_date || null,
         extendedProps: {
           authorId: ev.author_id,
           authorName: ev.author || 'unknown',
@@ -146,7 +162,14 @@
           hour: '2-digit', minute: '2-digit'
         }) : 'Unknown date';
 
-        var msg = `Event: ${props.rawTitle}\nAdded by: ${props.authorName}\nDate: ${dateStr}`;
+        var msg = `Event: ${props.rawTitle}\nAdded by: ${props.authorName}\nStart: ${dateStr}`;
+        if (ev.end) {
+          var endDateStr = ev.end.toLocaleString(undefined, {
+            weekday: 'short', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          });
+          msg += `\nEnd: ${endDateStr}`;
+        }
         
         var canDelete = (currentUserRole === 'admin' || currentUserId === props.authorId);
         

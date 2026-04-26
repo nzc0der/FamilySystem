@@ -399,7 +399,7 @@
       <li class="event-item">
         <div class="event-header">
           <span class="event-title">{{ ev.title }}</span>
-          {% if session.role == 'admin' %}
+          {% if session.role == 'admin' or session.user_id == ev.author_id %}
           <form method="POST" action="{{ url_for('event_delete', event_id=ev.id) }}" style="display:inline;">
             <button type="submit" class="bookmark-del" title="Delete Event">&#x2715;</button>
           </form>
@@ -407,6 +407,9 @@
         </div>
         <div class="event-date">
           📅 {{ ev.event_date[:10] }} {% if ev.event_date[11:16] %}{{ ev.event_date[11:16] }}{% endif %}
+          {% if ev.end_date %}
+            &rarr; {{ ev.end_date[:10] }} {% if ev.end_date[11:16] %}{{ ev.end_date[11:16] }}{% endif %}
+          {% endif %}
         </div>
         <div class="event-meta">
           <span>Added by {{ ev.author or 'unknown' }}</span>
@@ -422,6 +425,7 @@
     <form method="POST" action="{{ url_for('event_add') }}" class="event-add-form">
       <input type="text" name="title" placeholder="Event Name" required />
       <input type="datetime-local" name="event_date" required />
+      <input type="datetime-local" name="end_date" title="End Date (Optional)" />
       <button type="submit" class="btn btn-primary btn-sm">Add Event</button>
     </form>
     {% endif %}

@@ -236,6 +236,11 @@ def init_schema() -> None:
             conn.execute("ALTER TABLE users ADD COLUMN shopping_permission TEXT DEFAULT 'full';")
         except sqlite3.OperationalError:
             pass
+
+        try:
+            conn.execute("ALTER TABLE events ADD COLUMN end_date DATETIME;")
+        except sqlite3.OperationalError:
+            pass
     logger.info("Database schema verified / created.")
 
 
@@ -571,7 +576,7 @@ def get_events() -> list[dict]:
     with _get_db() as conn:
         rows = conn.execute(
             """
-            SELECT e.id, e.title, e.event_date, e.author_id, u.username as author
+            SELECT e.id, e.title, e.event_date, e.end_date, e.author_id, u.username as author
             FROM events e
             LEFT JOIN users u ON u.id = e.author_id
             WHERE e.event_date >= date('now', '-1 day')
@@ -586,7 +591,7 @@ def get_all_events() -> list[dict]:
     with _get_db() as conn:
         rows = conn.execute(
             """
-            SELECT e.id, e.title, e.event_date, e.author_id, u.username as author
+            SELECT e.id, e.title, e.event_date, e.end_date, e.author_id, u.username as author
             FROM events e
             LEFT JOIN users u ON u.id = e.author_id
             ORDER BY e.event_date ASC
@@ -605,12 +610,12 @@ def get_event(event_id: int) -> dict | None:
     return dict(row) if row else None
 
 
-def add_event(author_id: int, title: str, event_date: str) -> int:
+def add_event(author_id: int, title: str, event_date: str, end_date: str = None) -> int:
     """Insert a new event and return its id."""
     with _get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO events (author_id, title, event_date) VALUES (?, ?, ?)",
-            (author_id, title.strip(), event_date.strip()),
+            "INSERT INTO events (author_id, title, event_date, end_date) VALUES (?, ?, ?, ?)",
+            (author_id, title.strip(), event_date.strip(), end_date.strip() if end_date else None),
         )
         return cur.lastrowid
 
