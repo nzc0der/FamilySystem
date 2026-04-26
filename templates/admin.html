@@ -112,6 +112,63 @@
 
 </div>
 
+<!-- User Management -->
+<div class="card mt-3">
+  <div class="card-title">User Management</div>
+  <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--color-text);">
+    <thead>
+      <tr style="border-bottom: 1px solid var(--color-border); text-align: left;">
+        <th style="padding: 0.5rem; font-weight: 500;">ID</th>
+        <th style="padding: 0.5rem; font-weight: 500;">Username</th>
+        <th style="padding: 0.5rem; font-weight: 500;">Role</th>
+        <th style="padding: 0.5rem; font-weight: 500;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr style="border-bottom: 1px solid var(--color-surface-2);">
+        <td style="padding: 0.5rem;">{{ u.id }}</td>
+        <td style="padding: 0.5rem;"><strong>{{ u.username }}</strong></td>
+        <td style="padding: 0.5rem;">
+          {% if u.role == 'admin' %}
+            <span class="pill pill-admin">admin</span>
+          {% elif u.role == 'guest' %}
+            <span class="pill" style="background: var(--color-surface-2); color: var(--color-muted); border: 1px solid var(--color-border);">guest</span>
+          {% else %}
+            <span class="pill" style="background: rgba(52,211,153,0.1); color: var(--color-success); border: 1px solid rgba(52,211,153,0.3);">user</span>
+          {% endif %}
+        </td>
+        <td style="padding: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          {% if u.role != 'guest' %}
+          <!-- Rename form -->
+          <form method="POST" action="{{ url_for('admin_user_rename') }}" style="display:flex; gap: 0.25rem;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <input type="text" name="new_username" placeholder="New name" required style="width: 100px; padding: 0.25rem; font-size: 0.8rem; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius); color: var(--color-text);" />
+            <button type="submit" class="btn btn-primary btn-sm">Rename</button>
+          </form>
+
+          <!-- Password form -->
+          <form method="POST" action="{{ url_for('admin_user_password') }}" style="display:flex; gap: 0.25rem;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <input type="password" name="new_password" placeholder="New pass" required minlength="6" style="width: 100px; padding: 0.25rem; font-size: 0.8rem; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius); color: var(--color-text);" />
+            <button type="submit" class="btn btn-warning btn-sm" style="background: var(--color-warning); color: #000; border: none; border-radius: var(--radius); font-weight: 500; padding: 0.3rem 0.7rem; cursor: pointer;">Reset PW</button>
+          </form>
+          {% endif %}
+
+          {% if session.user_id != u.id %}
+          <!-- Delete user -->
+          <form method="POST" action="{{ url_for('admin_user_delete') }}" style="display:inline;">
+            <input type="hidden" name="user_id" value="{{ u.id }}">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('WARNING: Are you sure you want to delete {{ u.username }} and ALL their data?');">Delete</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <!-- Backups list -->
 <div class="card mt-3">
   <div class="card-title">

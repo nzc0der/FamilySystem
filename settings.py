@@ -214,6 +214,14 @@ def init_schema() -> None:
                 icon        TEXT    DEFAULT '🌐',
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS events (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                title       TEXT    NOT NULL,
+                event_date  DATETIME NOT NULL,
+                author_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+                created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
             """
         )
     logger.info("Database schema verified / created.")
@@ -326,6 +334,32 @@ def change_password(user_id: int, new_password: str) -> None:
             (password_hash, user_id)
         )
     logger.info("Password changed for user id %d.", user_id)
+
+
+def rename_user(user_id: int, new_username: str) -> None:
+    """Change the username for a given user."""
+    # Check for duplicates
+    existing = get_user_by_username(new_username)
+    if existing and existing["id"] != user_id:
+        raise ValueError(f"Username '{new_username}' is already taken.")
+        
+    with _get_db() as conn:
+        conn.execute("UPDATE users SET username = ? WHERE id = ?", (new_username.lower().strip(), user_id))
+    logger.info("User id %d renamed to '%s'.", user_id, new_username)
+
+
+def delete_user(user_id: int) -> None:
+    """Delete a user account."""
+    with _get_db() as conn:
+        # Check if we are deleting the last admin
+        user = conn.execute("SELECT role FROM users WHERE id = ?", (user_id,)).fetchone()
+        if user and user["role"] == "admin":
+            admin_count = conn.execute("SELECT COUNT(*) as count FROM users WHERE role = 'admin'").fetchone()
+            if admin_count["count"] <= 1:
+                raise ValueError("Cannot delete the last admin account.")
+                
+        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    logger.info("User id %d deleted.", user_id)
 
 
 # ---------------------------------------------------------------------------
@@ -502,3 +536,39 @@ def delete_bookmark(bookmark_id: int) -> None:
     """Delete a bookmark by id."""
     with _get_db() as conn:
         conn.execute("DELETE FROM bookmarks WHERE id = ?", (bookmark_id,))
+
+
+# ---------------------------------------------------------------------------
+# Event helpers
+# ---------------------------------------------------------------------------
+
+
+def get_events() -> list[dict]:
+    """Return upcoming events, ordered by date."""
+    with _get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT e.id, e.title, e.event_date, u.username as author
+            FROM events e
+            LEFT JOIN users u ON u.id = e.author_id
+            WHERE e.event_date >= date('now', '-1 day')
+            ORDER BY e.event_date ASC
+            """
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_event(author_id: int, title: str, event_date: str) -> int:
+    """Insert a new event and return its id."""
+    with _get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO events (author_id, title, event_date) VALUES (?, ?, ?)",
+            (author_id, title.strip(), event_date.strip()),
+        )
+        return cur.lastrowid
+
+
+def delete_event(event_id: int) -> None:
+    """Delete an event by id."""
+    with _get_db() as conn:
+        conn.execute("DELETE FROM events WHERE id = ?", (event_id,))

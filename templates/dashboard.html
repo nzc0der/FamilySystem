@@ -184,6 +184,18 @@
     50% { opacity: 1; }
     100% { opacity: 0.6; }
   }
+
+  .event-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+  .event-item {
+    background: var(--color-surface-2); border: 1px solid var(--color-border);
+    border-radius: var(--radius); padding: 0.6rem 0.8rem;
+    display: flex; flex-direction: column; gap: 0.2rem;
+  }
+  .event-header { display: flex; justify-content: space-between; align-items: center; }
+  .event-title { font-weight: 600; font-size: 0.9rem; color: var(--color-text); }
+  .event-date { font-size: 0.8rem; color: var(--color-primary); font-weight: 500; }
+  .event-meta { font-size: 0.75rem; color: var(--color-muted); display: flex; justify-content: space-between; }
+  .event-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
 </style>
 {% endblock %}
 
@@ -310,15 +322,13 @@
 
 </div>
 
-</div>
-
-<!-- Bookmarks & Weather Grid -->
-<div class="grid-2 mt-3">
+<!-- Lower Grid: Bookmarks | Weather | Events -->
+<div class="grid-3 mt-3">
 
   <!-- Bookmarks -->
   <div class="card">
     <div class="card-title">
-      Family Bookmarks
+      Quick Links
       <span class="badge">{{ bookmarks|length }}</span>
     </div>
 
@@ -339,15 +349,56 @@
       {% endfor %}
     </ul>
     {% else %}
-    <p class="todo-empty" style="padding: 0.5rem 0;">No bookmarks added yet.</p>
+    <p class="todo-empty" style="padding: 0.5rem 0;">No quick links added yet.</p>
     {% endif %}
 
     {% if session.role != 'guest' %}
     <form method="POST" action="{{ url_for('bookmark_add') }}" class="bookmark-add-form">
       <input type="text" name="icon" placeholder="Emoji 🌐" maxlength="5" style="flex: 0 0 60px; text-align: center;" />
-      <input type="text" name="title" placeholder="Title" required />
-      <input type="url" name="url" placeholder="https://..." required />
-      <button type="submit" class="btn btn-primary btn-sm">Add</button>
+      <input type="text" name="title" placeholder="Title" required style="flex:1;" />
+      <input type="url" name="url" placeholder="https://..." required style="width:100%; margin-top: 0.4rem;" />
+      <button type="submit" class="btn btn-primary btn-sm" style="width:100%; margin-top: 0.4rem;">Add Link</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- Events Widget -->
+  <div class="card">
+    <div class="card-title">
+      Upcoming Events
+      <span class="badge">{{ events|length }}</span>
+    </div>
+
+    {% if events %}
+    <ul class="event-list">
+      {% for ev in events %}
+      <li class="event-item">
+        <div class="event-header">
+          <span class="event-title">{{ ev.title }}</span>
+          {% if session.role == 'admin' %}
+          <form method="POST" action="{{ url_for('event_delete', event_id=ev.id) }}" style="display:inline;">
+            <button type="submit" class="bookmark-del" title="Delete Event">&#x2715;</button>
+          </form>
+          {% endif %}
+        </div>
+        <div class="event-date">
+          📅 {{ ev.event_date[:10] }} {% if ev.event_date[11:16] %}{{ ev.event_date[11:16] }}{% endif %}
+        </div>
+        <div class="event-meta">
+          <span>Added by {{ ev.author or 'unknown' }}</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="todo-empty" style="padding: 0.5rem 0;">No upcoming events.</p>
+    {% endif %}
+
+    {% if session.role != 'guest' %}
+    <form method="POST" action="{{ url_for('event_add') }}" class="event-add-form">
+      <input type="text" name="title" placeholder="Event Name" required />
+      <input type="datetime-local" name="event_date" required />
+      <button type="submit" class="btn btn-primary btn-sm">Add Event</button>
     </form>
     {% endif %}
   </div>

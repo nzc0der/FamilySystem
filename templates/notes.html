@@ -222,34 +222,54 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-  function openEditor(noteId, title, content) {
-    var modal   = document.getElementById('note-modal');
-    var heading = document.getElementById('modal-heading');
-    var idField = document.getElementById('note-id-field');
-    var titleF  = document.getElementById('note-title-field');
-    var contentF= document.getElementById('note-content-area');
+  <script>
+    function openEditor(noteId, title, content) {
+      var modal   = document.getElementById('note-modal');
+      var heading = document.getElementById('modal-heading');
+      var idField = document.getElementById('note-id-field');
+      var titleF  = document.getElementById('note-title-field');
+      var contentF= document.getElementById('note-content-area');
 
-    idField.value  = noteId || '';
-    titleF.value   = title  || '';
-    contentF.value = content || '';
-    heading.textContent = noteId ? 'Edit Note' : 'New Note';
-    modal.classList.remove('hidden');
-    titleF.focus();
-  }
+      idField.value  = noteId || '';
+      titleF.value   = title  || '';
+      contentF.value = content || '';
+      heading.textContent = noteId ? 'Edit Note' : 'New Note';
+      modal.classList.remove('hidden');
+      titleF.focus();
+    }
 
-  function closeEditor() {
-    document.getElementById('note-modal').classList.add('hidden');
-  }
+    function closeEditor() {
+      document.getElementById('note-modal').classList.add('hidden');
+    }
 
-  // Close modal on overlay click.
-  document.getElementById('note-modal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditor();
-  });
+    // Close modal on overlay click.
+    document.getElementById('note-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditor();
+    });
 
-  // Close on Escape.
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeEditor();
-  });
-</script>
+    // Close on Escape.
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeEditor();
+    });
+
+    // Render Markdown for notes
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof marked !== 'undefined') {
+        document.querySelectorAll('.note-card-body').forEach(function(el) {
+          const rawText = el.textContent;
+          el.innerHTML = marked.parse(rawText);
+        });
+      }
+    });
+  </script>
+  <style>
+    .note-card-body h1, .note-card-body h2, .note-card-body h3 {
+      font-size: 1rem; color: var(--color-text); margin-top: 0.5rem; margin-bottom: 0.25rem; font-weight: 600;
+    }
+    .note-card-body p { margin-bottom: 0.5rem; }
+    .note-card-body ul, .note-card-body ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+    .note-card-body pre { background: var(--color-surface-2); padding: 0.5rem; border-radius: var(--radius); overflow-x: auto; margin-bottom: 0.5rem; }
+    .note-card-body code { font-family: monospace; background: var(--color-surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8em; }
+    .note-card-body blockquote { border-left: 3px solid var(--color-primary); padding-left: 0.5rem; color: var(--color-muted); margin-bottom: 0.5rem; }
+  </style>
 {% endblock %}

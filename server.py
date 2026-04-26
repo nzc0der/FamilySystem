@@ -193,7 +193,9 @@ def _register_routes(app: Flask) -> None:
                 request.remote_addr,
             )
 
-        return render_template("login.html")
+        users = settings.get_users()
+        users = [u for u in users if u["username"] != "guest"]
+        return render_template("login.html", users=users)
 
     @app.route("/logout")
     def logout():
@@ -215,12 +217,14 @@ def _register_routes(app: Flask) -> None:
         notes = settings.get_notes(user_id)
         announcements = settings.get_announcements()[:3]  # Preview top 3.
         bookmarks = settings.get_bookmarks()
+        events = settings.get_events()
         return render_template(
             "dashboard.html",
             todos=todos,
             notes=notes,
             announcements=announcements,
             bookmarks=bookmarks,
+            events=events,
         )
 
     # --- To-dos ---
@@ -340,6 +344,30 @@ def _register_routes(app: Flask) -> None:
         return redirect(url_for("dashboard"))
 
     # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
+
+    @app.route("/events/add", methods=["POST"])
+    @login_required
+    def event_add():
+        title = request.form.get("title", "").strip()
+        event_date = request.form.get("event_date", "").strip()
+        if title and event_date:
+            settings.add_event(session["user_id"], title, event_date)
+        else:
+            flash("Event must have a title and date.", "warning")
+        return redirect(url_for("dashboard"))
+
+    @app.route("/events/delete/<int:event_id>", methods=["POST"])
+    @login_required
+    def event_delete(event_id: int):
+        # We allow admins or the creator to delete. Since dashboard is personal context, 
+        # let's just use admin_required for deletion to be safe, or let anyone delete.
+        # Let's let admins only delete for now, or maybe everyone if it's family.
+        settings.delete_event(event_id)
+        return redirect(url_for("dashboard"))
+
+    # ------------------------------------------------------------------
     # Profile
     # ------------------------------------------------------------------
 
@@ -379,8 +407,9 @@ def _register_routes(app: Flask) -> None:
                 if os.path.isfile(fpath):
                     size_kb = os.path.getsize(fpath) // 1024
                     backups.append({"name": fname, "size_kb": size_kb})
+        users = settings.get_users()
         cfg = settings.load_config()
-        return render_template("admin.html", backups=backups[:20], config=cfg)
+        return render_template("admin.html", backups=backups[:20], config=cfg, users=users)
 
     @app.route("/admin/update", methods=["POST"])
     @login_required
@@ -412,6 +441,47 @@ def _register_routes(app: Flask) -> None:
             logger.info("Manual restore from '%s' by user '%s'.", backup_name, session["username"])
         except Exception as exc:
             flash(f"Restore failed: {exc}", "danger")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/users/rename", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_user_rename():
+        user_id = int(request.form.get("user_id"))
+        new_username = request.form.get("new_username", "").strip()
+        if not new_username:
+            flash("Username cannot be empty.", "warning")
+            return redirect(url_for("admin_panel"))
+        try:
+            settings.rename_user(user_id, new_username)
+            flash(f"User renamed to {new_username}.", "success")
+        except ValueError as e:
+            flash(str(e), "danger")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/users/password", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_user_password():
+        user_id = int(request.form.get("user_id"))
+        new_password = request.form.get("new_password", "")
+        if len(new_password) < 6:
+            flash("Password must be at least 6 characters.", "warning")
+            return redirect(url_for("admin_panel"))
+        settings.change_password(user_id, new_password)
+        flash("User password updated.", "success")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/users/delete", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_user_delete():
+        user_id = int(request.form.get("user_id"))
+        try:
+            settings.delete_user(user_id)
+            flash("User deleted.", "success")
+        except ValueError as e:
+            flash(str(e), "danger")
         return redirect(url_for("admin_panel"))
 
     # ------------------------------------------------------------------

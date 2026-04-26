@@ -195,7 +195,7 @@
           <textarea
             id="ann-body"
             name="body"
-            placeholder="More details..."
+            placeholder="More details... (Markdown supported)"
             maxlength="2000"
           ></textarea>
         </div>
@@ -219,4 +219,27 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof marked !== 'undefined') {
+      document.querySelectorAll('.ann-card-body').forEach(function(el) {
+        const rawText = el.textContent;
+        el.innerHTML = marked.parse(rawText);
+      });
+    }
+  });
+</script>
+<style>
+  .ann-card-body h1, .ann-card-body h2, .ann-card-body h3 {
+    font-size: 1rem; color: var(--color-text); margin-top: 0.5rem; margin-bottom: 0.25rem; font-weight: 600;
+  }
+  .ann-card-body p { margin-bottom: 0.5rem; }
+  .ann-card-body ul, .ann-card-body ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+  .ann-card-body pre { background: var(--color-surface-2); padding: 0.5rem; border-radius: var(--radius); overflow-x: auto; margin-bottom: 0.5rem; }
+  .ann-card-body code { font-family: monospace; background: var(--color-surface-2); padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.8em; }
+  .ann-card-body blockquote { border-left: 3px solid var(--color-primary); padding-left: 0.5rem; color: var(--color-muted); margin-bottom: 0.5rem; }
+</style>
 {% endblock %}
