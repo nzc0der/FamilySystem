@@ -571,7 +571,7 @@ def get_events() -> list[dict]:
     with _get_db() as conn:
         rows = conn.execute(
             """
-            SELECT e.id, e.title, e.event_date, u.username as author
+            SELECT e.id, e.title, e.event_date, e.author_id, u.username as author
             FROM events e
             LEFT JOIN users u ON u.id = e.author_id
             WHERE e.event_date >= date('now', '-1 day')
@@ -579,6 +579,30 @@ def get_events() -> list[dict]:
             """
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_all_events() -> list[dict]:
+    """Return all events."""
+    with _get_db() as conn:
+        rows = conn.execute(
+            """
+            SELECT e.id, e.title, e.event_date, e.author_id, u.username as author
+            FROM events e
+            LEFT JOIN users u ON u.id = e.author_id
+            ORDER BY e.event_date ASC
+            """
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_event(event_id: int) -> dict | None:
+    """Return a single event by id."""
+    with _get_db() as conn:
+        row = conn.execute(
+            "SELECT * FROM events WHERE id = ?",
+            (event_id,)
+        ).fetchone()
+    return dict(row) if row else None
 
 
 def add_event(author_id: int, title: str, event_date: str) -> int:

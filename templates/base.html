@@ -439,6 +439,12 @@
         </a>
       </li>
       <li>
+        <a href="{{ url_for('calendar') }}"
+           class="{% if request.endpoint == 'calendar' %}active{% endif %}">
+          Calendar
+        </a>
+      </li>
+      <li>
         <a href="{{ url_for('notes_list') }}"
            class="{% if request.endpoint == 'notes_list' %}active{% endif %}">
           Notes

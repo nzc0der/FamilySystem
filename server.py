@@ -349,6 +349,12 @@ def _register_routes(app: Flask) -> None:
     # Events
     # ------------------------------------------------------------------
 
+    @app.route("/calendar")
+    @login_required
+    def calendar():
+        events = settings.get_all_events()
+        return render_template("calendar.html", events=events)
+
     @app.route("/events/add", methods=["POST"])
     @login_required
     def event_add():
@@ -356,18 +362,23 @@ def _register_routes(app: Flask) -> None:
         event_date = request.form.get("event_date", "").strip()
         if title and event_date:
             settings.add_event(session["user_id"], title, event_date)
+            flash("Event added successfully.", "success")
         else:
             flash("Event must have a title and date.", "warning")
-        return redirect(url_for("dashboard"))
+        return redirect(request.referrer or url_for("dashboard"))
 
     @app.route("/events/delete/<int:event_id>", methods=["POST"])
     @login_required
     def event_delete(event_id: int):
-        # We allow admins or the creator to delete. Since dashboard is personal context, 
-        # let's just use admin_required for deletion to be safe, or let anyone delete.
-        # Let's let admins only delete for now, or maybe everyone if it's family.
-        settings.delete_event(event_id)
-        return redirect(url_for("dashboard"))
+        event = settings.get_event(event_id)
+        if not event:
+            flash("Event not found.", "warning")
+        elif session.get("role") != "admin" and session.get("user_id") != event.get("author_id"):
+            flash("You can only delete events you created. Only System Admins can delete any event.", "danger")
+        else:
+            settings.delete_event(event_id)
+            flash("Event removed.", "success")
+        return redirect(request.referrer or url_for("dashboard"))
 
     # ------------------------------------------------------------------
     # Shopping List

@@ -50,6 +50,7 @@
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
     -webkit-box-orient: vertical;
   }
 
@@ -167,8 +168,10 @@
       <div class="flex gap-1">
         <button
           id="note-edit-{{ note.id }}"
-          class="btn btn-ghost btn-sm"
-          onclick="openEditor({{ note.id }}, {{ note.title|tojson }}, {{ note.content|tojson }})"
+          class="btn btn-ghost btn-sm edit-note-btn"
+          data-note-id="{{ note.id }}"
+          data-note-title="{{ note.title }}"
+          data-note-content="{{ note.content }}"
         >Edit</button>
         <form method="POST" action="{{ url_for('note_delete', note_id=note.id) }}" style="display:inline;">
           <button
@@ -252,7 +255,7 @@
       if (e.key === 'Escape') closeEditor();
     });
 
-    // Render Markdown for notes
+    // Render Markdown for notes and attach event listeners
     document.addEventListener('DOMContentLoaded', function() {
       if (typeof marked !== 'undefined') {
         document.querySelectorAll('.note-card-body').forEach(function(el) {
@@ -260,6 +263,16 @@
           el.innerHTML = marked.parse(rawText);
         });
       }
+      
+      document.querySelectorAll('.edit-note-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openEditor(
+            this.getAttribute('data-note-id'),
+            this.getAttribute('data-note-title'),
+            this.getAttribute('data-note-content')
+          );
+        });
+      });
     });
   </script>
   <style>
