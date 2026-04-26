@@ -369,7 +369,9 @@
     /* ---------------------------------------------------------------
        Responsive
     --------------------------------------------------------------- */
+    .mobile-only { display: none; }
     @media (max-width: 640px) {
+      .mobile-only { display: block; }
       nav { padding: 0.5rem 1rem; flex-wrap: wrap; height: auto; }
       .nav-brand { width: 100%; justify-content: space-between; margin-bottom: 0.5rem; }
       .nav-links { width: 100%; justify-content: center; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
@@ -464,6 +466,14 @@
         </a>
       </li>
       {% endif %}
+      {% if session.role != 'guest' %}
+      <li class="mobile-only">
+        <a href="#" onclick="document.getElementById('password-modal').classList.remove('hidden')">Change Password</a>
+      </li>
+      {% endif %}
+      <li class="mobile-only">
+        <a href="{{ url_for('logout') }}" style="color: var(--color-danger);">Log out</a>
+      </li>
     </ul>
     <div class="nav-user">
       <div class="dropdown">
