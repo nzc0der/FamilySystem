@@ -214,11 +214,13 @@ def _register_routes(app: Flask) -> None:
         todos = settings.get_todos(user_id)
         notes = settings.get_notes(user_id)
         announcements = settings.get_announcements()[:3]  # Preview top 3.
+        bookmarks = settings.get_bookmarks()
         return render_template(
             "dashboard.html",
             todos=todos,
             notes=notes,
             announcements=announcements,
+            bookmarks=bookmarks,
         )
 
     # --- To-dos ---
@@ -311,6 +313,55 @@ def _register_routes(app: Flask) -> None:
     def board_pin(ann_id: int):
         settings.toggle_pin(ann_id)
         return redirect(url_for("board"))
+
+    # ------------------------------------------------------------------
+    # Bookmarks
+    # ------------------------------------------------------------------
+
+    @app.route("/bookmarks/add", methods=["POST"])
+    @login_required
+    def bookmark_add():
+        title = request.form.get("title", "").strip()
+        url = request.form.get("url", "").strip()
+        icon = request.form.get("icon", "🌐").strip()
+        if title and url:
+            if not url.startswith("http"):
+                url = "https://" + url
+            settings.add_bookmark(title, url, icon)
+        else:
+            flash("Bookmark must have a title and URL.", "warning")
+        return redirect(url_for("dashboard"))
+
+    @app.route("/bookmarks/delete/<int:bm_id>", methods=["POST"])
+    @login_required
+    @admin_required
+    def bookmark_delete(bm_id: int):
+        settings.delete_bookmark(bm_id)
+        return redirect(url_for("dashboard"))
+
+    # ------------------------------------------------------------------
+    # Profile
+    # ------------------------------------------------------------------
+
+    @app.route("/profile/password", methods=["POST"])
+    @login_required
+    def change_password():
+        if session.get("role") == "guest":
+            flash("Guest users cannot change passwords.", "danger")
+            return redirect(url_for("dashboard"))
+
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if len(new_password) < 6:
+            flash("Password must be at least 6 characters long.", "warning")
+        elif new_password != confirm_password:
+            flash("Passwords do not match.", "warning")
+        else:
+            settings.change_password(session["user_id"], new_password)
+            flash("Password successfully updated.", "success")
+
+        return redirect(url_for("dashboard"))
 
     # ------------------------------------------------------------------
     # Admin panel (update / backup status)

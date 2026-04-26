@@ -369,6 +369,43 @@
       .nav-links a { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
       .page-wrapper { padding: 1.25rem 1rem; }
     }
+
+    /* ---------------------------------------------------------------
+       Modal & Dropdown
+    --------------------------------------------------------------- */
+    .dropdown { position: relative; display: inline-block; }
+    .dropdown-content {
+      display: none; position: absolute; right: 0; top: 100%;
+      background-color: var(--color-surface);
+      min-width: 140px; box-shadow: var(--shadow);
+      z-index: 200; border: 1px solid var(--color-border);
+      border-radius: var(--radius); padding: 0.5rem 0;
+    }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-content a {
+      color: var(--color-text); padding: 0.5rem 1rem;
+      text-decoration: none; display: block; font-size: 0.85rem;
+    }
+    .dropdown-content a:hover { background-color: var(--color-surface-2); }
+
+    .base-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; animation: fadeOverlay 0.2s ease;
+    }
+    .base-modal-overlay.hidden { display: none; }
+    .base-modal-box {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 2rem;
+      width: 100%; max-width: 400px; box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .base-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .base-modal-header h2 { font-size: 1.05rem; font-weight: 600; }
+    .base-modal-close { background: none; border: none; color: var(--color-muted); font-size: 1.2rem; cursor: pointer; line-height: 1; }
+    .base-modal-close:hover { color: var(--color-text); }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
@@ -408,12 +445,19 @@
       {% endif %}
     </ul>
     <div class="nav-user">
-      <div class="avatar">{{ session.username[0]|upper }}</div>
+      <div class="dropdown">
+        <div class="avatar" style="cursor: pointer;">{{ session.username[0]|upper }}</div>
+        <div class="dropdown-content">
+          {% if session.role != 'guest' %}
+          <a href="#" onclick="document.getElementById('password-modal').classList.remove('hidden')">Change Password</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}">Log out</a>
+        </div>
+      </div>
       <span>{{ session.username }}</span>
       {% if session.role == 'admin' %}
         <span class="pill pill-admin">admin</span>
       {% endif %}
-      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Log out</a>
     </div>
   </nav>
   {% endif %}
@@ -431,6 +475,32 @@
 
     {% block content %}{% endblock %}
   </div>
+
+  {% if session.role != 'guest' %}
+  <!-- Password Change Modal -->
+  <div id="password-modal" class="base-modal-overlay hidden">
+    <div class="base-modal-box">
+      <div class="base-modal-header">
+        <h2>Change Password</h2>
+        <button class="base-modal-close" onclick="document.getElementById('password-modal').classList.add('hidden')" aria-label="Close">&times;</button>
+      </div>
+      <form method="POST" action="{{ url_for('change_password') }}">
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <input type="password" id="new_password" name="new_password" required minlength="6" />
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm New Password</label>
+          <input type="password" id="confirm_password" name="confirm_password" required minlength="6" />
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-ghost" onclick="document.getElementById('password-modal').classList.add('hidden')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
   <footer>
     Family Dashboard &mdash; running locally on this network &mdash;

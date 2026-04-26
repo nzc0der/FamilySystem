@@ -206,6 +206,14 @@ def init_schema() -> None:
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS bookmarks (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                title       TEXT    NOT NULL,
+                url         TEXT    NOT NULL,
+                icon        TEXT    DEFAULT '🌐',
+                created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
             """
         )
     logger.info("Database schema verified / created.")
@@ -305,6 +313,19 @@ def verify_user(username: str, password: str) -> Optional[dict]:
     except Exception as exc:
         logger.error("bcrypt verification error for user '%s': %s", username, exc)
     return None
+
+
+def change_password(user_id: int, new_password: str) -> None:
+    """Update the password for a given user."""
+    password_hash = bcrypt.hashpw(
+        new_password.encode("utf-8"), bcrypt.gensalt(rounds=12)
+    ).decode("utf-8")
+    with _get_db() as conn:
+        conn.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (password_hash, user_id)
+        )
+    logger.info("Password changed for user id %d.", user_id)
 
 
 # ---------------------------------------------------------------------------
@@ -451,3 +472,33 @@ def toggle_pin(ann_id: int) -> None:
             "UPDATE announcements SET pinned = CASE WHEN pinned=0 THEN 1 ELSE 0 END WHERE id = ?",
             (ann_id,),
         )
+
+
+# ---------------------------------------------------------------------------
+# Bookmark helpers
+# ---------------------------------------------------------------------------
+
+
+def get_bookmarks() -> list[dict]:
+    """Return all bookmarks, ordered newest first."""
+    with _get_db() as conn:
+        rows = conn.execute(
+            "SELECT * FROM bookmarks ORDER BY created_at DESC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_bookmark(title: str, url: str, icon: str = '🌐') -> int:
+    """Insert a new bookmark and return its id."""
+    with _get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO bookmarks (title, url, icon) VALUES (?, ?, ?)",
+            (title.strip(), url.strip(), icon.strip() or '🌐'),
+        )
+        return cur.lastrowid
+
+
+def delete_bookmark(bookmark_id: int) -> None:
+    """Delete a bookmark by id."""
+    with _get_db() as conn:
+        conn.execute("DELETE FROM bookmarks WHERE id = ?", (bookmark_id,))
