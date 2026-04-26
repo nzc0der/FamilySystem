@@ -69,6 +69,12 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
     .nav-brand {
       font-weight: 700;
       font-size: 1.1rem;
@@ -76,6 +82,7 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      white-space: nowrap;
     }
 
     .nav-brand span.dot {
@@ -369,14 +376,55 @@
     /* ---------------------------------------------------------------
        Responsive
     --------------------------------------------------------------- */
+    .desktop-only { display: block; }
     .mobile-only { display: none; }
+
     @media (max-width: 640px) {
+      .desktop-only { display: none; }
       .mobile-only { display: block; }
-      nav { padding: 0.5rem 1rem; flex-wrap: wrap; height: auto; }
-      .nav-brand { width: 100%; justify-content: space-between; margin-bottom: 0.5rem; }
-      .nav-links { width: 100%; justify-content: center; gap: 0.2rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
-      .nav-links a { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
-      .nav-user { width: 100%; justify-content: center; }
+      
+      nav { 
+        height: auto; 
+        padding: 0.75rem 1rem; 
+        display: block; 
+      }
+      
+      .nav-left {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0.75rem;
+      }
+
+      .nav-links { 
+        width: 100%; 
+        justify-content: flex-start; 
+        gap: 0.4rem; 
+        overflow-x: auto; 
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .nav-links li { flex-shrink: 0; }
+      .nav-links a { 
+        padding: 0.4rem 0.75rem; 
+        font-size: 0.8rem; 
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+      }
+
+      .nav-user { 
+        margin-left: auto;
+      }
+      .nav-user span, .nav-user .pill { display: none; }
+      
+      .dropdown-content {
+        right: 0;
+        left: auto;
+      }
+      
       .page-wrapper { padding: 1.25rem 1rem; }
       .grid-2, .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
     }
@@ -417,16 +465,32 @@
     .base-modal-header h2 { font-size: 1.05rem; font-weight: 600; }
     .base-modal-close { background: none; border: none; color: var(--color-muted); font-size: 1.2rem; cursor: pointer; line-height: 1; }
     .base-modal-close:hover { color: var(--color-text); }
+    
+    .dropdown.active .dropdown-content { display: block; }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
   {% if session.username %}
   <nav>
-    <div class="nav-brand">
-      <span class="dot"></span>
-      Family Dashboard
+    <div class="nav-left">
+      <div class="nav-brand">
+        <span class="dot"></span>
+        Family Dashboard
+      </div>
+      
+      <div class="nav-user mobile-only">
+        <div class="dropdown">
+          <div class="avatar" style="cursor: pointer;" onclick="event.stopPropagation(); this.parentElement.classList.toggle('active')">
+            {{ session.username[0]|upper }}
+          </div>
+          <div class="dropdown-content">
+            <a href="{{ url_for('logout') }}" style="color: var(--color-danger); font-weight: 600;">Log out</a>
+          </div>
+        </div>
+      </div>
     </div>
+
     <ul class="nav-links">
       <li>
         <a href="{{ url_for('dashboard') }}"
@@ -466,16 +530,9 @@
         </a>
       </li>
       {% endif %}
-      {% if session.role != 'guest' %}
-      <li class="mobile-only">
-        <a href="#" onclick="document.getElementById('password-modal').classList.remove('hidden')">Change Password</a>
-      </li>
-      {% endif %}
-      <li class="mobile-only">
-        <a href="{{ url_for('logout') }}" style="color: var(--color-danger);">Log out</a>
-      </li>
     </ul>
-    <div class="nav-user">
+
+    <div class="nav-user desktop-only">
       <div class="dropdown">
         <div class="avatar" style="cursor: pointer;">{{ session.username[0]|upper }}</div>
         <div class="dropdown-content">
@@ -549,6 +606,13 @@
       tick();
       setInterval(tick, 10000);
     })();
+
+    // Close mobile dropdown on outside click
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.dropdown.active').forEach(function(d) {
+        d.classList.remove('active');
+      });
+    });
   </script>
   {% block extra_scripts %}{% endblock %}
 </body>
