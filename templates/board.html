@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Family Board - Family Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .board-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 820px) {
+    .board-layout { grid-template-columns: 1fr; }
+  }
+
+  /* ---------------------------------------------------------------
+     Announcement cards
+  --------------------------------------------------------------- */
+  .ann-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.4rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s;
+    animation: slideIn 0.25s ease;
+    position: relative;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ann-card.pinned {
+    border-color: rgba(167,139,250,0.4);
+    background: linear-gradient(135deg, var(--color-surface) 90%, rgba(167,139,250,0.06));
+  }
+
+  .ann-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .ann-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .ann-card-body {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .ann-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.65rem;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+
+  .ann-card-actions { display: flex; gap: 0.3rem; }
+
+  .empty-board {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--color-muted);
+  }
+
+  /* ---------------------------------------------------------------
+     Post form
+  --------------------------------------------------------------- */
+  .post-form-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 76px;
+  }
+
+  .post-form-card .card-title { margin-bottom: 1rem; }
+
+  .pin-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .pin-row input[type="checkbox"] { accent-color: var(--color-accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Family Announcement Board</h1>
+  <p class="text-muted">Shared updates and messages for the whole family.</p>
+</div>
+
+<div class="board-layout">
+
+  <!-- Announcement list -->
+  <div>
+    {% if announcements %}
+      {% for ann in announcements %}
+      <div class="ann-card {% if ann.pinned %}pinned{% endif %}">
+        <div class="ann-card-header">
+          <div class="ann-card-title">
+            {% if ann.pinned %}
+              <span class="pill pill-pinned">Pinned</span>
+            {% endif %}
+            {{ ann.title }}
+          </div>
+          {% if session.role == 'admin' %}
+          <div class="ann-card-actions">
+            <form method="POST" action="{{ url_for('board_pin', ann_id=ann.id) }}">
+              <button
+                id="ann-pin-{{ ann.id }}"
+                type="submit"
+                class="btn btn-ghost btn-sm"
+                title="{% if ann.pinned %}Unpin{% else %}Pin{% endif %}"
+              >{% if ann.pinned %}Unpin{% else %}Pin{% endif %}</button>
+            </form>
+            <form method="POST" action="{{ url_for('board_delete', ann_id=ann.id) }}">
+              <button
+                id="ann-del-{{ ann.id }}"
+                type="submit"
+                class="btn btn-danger btn-sm"
+                title="Delete"
+                onclick="return confirm('Delete this announcement?');"
+              >Delete</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if ann.body %}
+        <div class="ann-card-body">{{ ann.body }}</div>
+        {% endif %}
+
+        <div class="ann-card-meta">
+          <span>Posted by <strong>{{ ann.author or 'unknown' }}</strong></span>
+          &mdash;
+          <span>
+            {{ ann.created_at[:16].replace('T', ' ') if 'T' in ann.created_at else ann.created_at[:16] }}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-board">
+      <p style="margin-bottom: 0.5rem;">No announcements yet.</p>
+      <p style="font-size:0.8rem;">Be the first to post one using the form on the right.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Post form -->
+  <div>
+    {% if session.role != 'guest' %}
+    <div class="post-form-card">
+      <div class="card-title">Post Announcement</div>
+      <form id="board-post-form" method="POST" action="{{ url_for('board_post') }}">
+        <div class="form-group">
+          <label for="ann-title">Title <span class="text-danger">*</span></label>
+          <input
+            id="ann-title"
+            type="text"
+            name="title"
+            placeholder="Short title..."
+            maxlength="200"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="ann-body">Message (optional)</label>
+          <textarea
+            id="ann-body"
+            name="body"
+            placeholder="More details..."
+            maxlength="2000"
+          ></textarea>
+        </div>
+        {% if session.role == 'admin' %}
+        <div class="pin-row">
+          <input type="checkbox" id="ann-pinned" name="pinned" value="1" />
+          <label for="ann-pinned">Pin this announcement</label>
+        </div>
+        {% endif %}
+        <button id="ann-submit" type="submit" class="btn btn-primary" style="width:100%;">
+          Post
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card" style="text-align:center; color: var(--color-muted); font-size:0.875rem; padding:1.5rem;">
+      Guests can read announcements but cannot post.<br/>
+      <a href="{{ url_for('login') }}" style="margin-top:0.5rem;display:inline-block;">Log in to post</a>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

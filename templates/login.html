@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Family Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at 60% 40%, #1a2040 0%, #0f1117 70%);
+  }
+
+  .page-wrapper {
+    padding: 0;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .login-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    animation: fadeUp 0.35s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 0 24px rgba(108,143,255,0.35);
+  }
+
+  .login-title {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+
+  .login-subtitle {
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+  }
+
+  .login-card .btn-primary {
+    width: 100%;
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    transition: opacity 0.2s;
+  }
+
+  .login-card .btn-primary:hover { opacity: 0.9; }
+
+  .guest-link {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.83rem;
+    color: var(--color-muted);
+  }
+
+  .guest-link a { color: var(--color-primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-card">
+  <div class="login-logo">&#127968;</div>
+  <h1 class="login-title">Welcome back</h1>
+  <p class="login-subtitle">Sign in to your family dashboard</p>
+
+  {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+      <ul class="flash-list">
+        {% for category, message in messages %}
+          <li class="flash flash-{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form id="login-form" method="POST" action="{{ url_for('login') }}" autocomplete="off">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        type="text"
+        name="username"
+        placeholder="Enter your username"
+        autocomplete="username"
+        required
+        autofocus
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        name="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+      />
+    </div>
+
+    <button id="login-submit" type="submit" class="btn btn-primary">Sign In</button>
+  </form>
+
+  <div class="guest-link">
+    Browsing without an account?
+    <form method="POST" action="{{ url_for('login') }}" style="display:inline;">
+      <input type="hidden" name="username" value="guest" />
+      <input type="hidden" name="password" value="" />
+      <button
+        id="guest-login"
+        type="submit"
+        style="background:none;border:none;cursor:pointer;font:inherit;"
+      >
+        <a href="#">Continue as Guest</a>
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

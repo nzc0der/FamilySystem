@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Family Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .greeting {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    background: linear-gradient(90deg, var(--color-text), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ---------------------------------------------------------------
+     To-do section
+  --------------------------------------------------------------- */
+  .todo-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .todo-input-row input { flex: 1; }
+
+  .todo-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .todo-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.55rem 0.75rem;
+    transition: opacity 0.2s, border-color 0.2s;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .todo-item.done {
+    opacity: 0.45;
+    border-color: transparent;
+  }
+
+  .todo-item.done .todo-text {
+    text-decoration: line-through;
+    color: var(--color-muted);
+  }
+
+  .todo-text { flex: 1; font-size: 0.9rem; }
+
+  .todo-actions { display: flex; gap: 0.3rem; }
+
+  .todo-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .todo-item.done .todo-check {
+    background: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  .todo-empty {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+
+  /* ---------------------------------------------------------------
+     Announcement preview
+  --------------------------------------------------------------- */
+  .ann-preview {
+    border-left: 3px solid var(--color-accent);
+    padding: 0.6rem 0.9rem;
+    background: rgba(167,139,250,0.05);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .ann-preview-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .ann-preview-meta {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+
+  .see-all-link {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--color-primary);
+    margin-top: 0.5rem;
+  }
+
+  /* ---------------------------------------------------------------
+     Progress ring
+  --------------------------------------------------------------- */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <p class="greeting" id="greeting-text">Hello, {{ session.username }}.</p>
+  <p class="text-muted" id="date-display"></p>
+</div>
+
+<!-- ---------------------------------------------------------------
+     Main grid: to-dos | announcements
+--------------------------------------------------------------- -->
+<div class="grid-2">
+
+  <!-- To-dos -->
+  <div class="card">
+    <div class="card-title">
+      My To-Dos
+      <span class="badge" id="todo-count">{{ todos|length }}</span>
+    </div>
+
+    {% if session.role != 'guest' %}
+    <!-- Progress bar -->
+    {% set done_count = todos | selectattr('done', 'equalto', 1) | list | length %}
+    {% set total = todos | length %}
+    {% set pct = ((done_count / total * 100) | int) if total > 0 else 0 %}
+    <div class="progress-row">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" style="width: {{ pct }}%;"></div>
+      </div>
+      <span class="progress-label">{{ done_count }}/{{ total }} done</span>
+    </div>
+
+    <!-- Add form -->
+    <form id="todo-add-form" method="POST" action="{{ url_for('todo_add') }}" class="todo-input-row">
+      <input
+        id="todo-input"
+        type="text"
+        name="content"
+        placeholder="Add a new to-do..."
+        maxlength="300"
+        required
+      />
+      <button id="todo-add-btn" type="submit" class="btn btn-primary btn-sm">Add</button>
+    </form>
+    {% endif %}
+
+    <!-- List -->
+    {% if todos %}
+    <ul class="todo-list" id="todo-list">
+      {% for todo in todos %}
+      <li class="todo-item {% if todo.done %}done{% endif %}" id="todo-{{ todo.id }}">
+        <!-- Toggle -->
+        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}" style="line-height:0;">
+          <button
+            id="todo-toggle-{{ todo.id }}"
+            type="submit"
+            class="todo-check"
+            title="{% if todo.done %}Mark incomplete{% else %}Mark complete{% endif %}"
+            style="border:none;cursor:pointer;"
+          >
+            {% if todo.done %}
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+              <path d="M2 5l2.5 2.5L8 2.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            {% endif %}
+          </button>
+        </form>
+
+        <span class="todo-text">{{ todo.content }}</span>
+
+        <!-- Delete -->
+        {% if session.role != 'guest' %}
+        <div class="todo-actions">
+          <form method="POST" action="{{ url_for('todo_delete', todo_id=todo.id) }}">
+            <button
+              id="todo-del-{{ todo.id }}"
+              type="submit"
+              class="btn btn-danger btn-sm"
+              title="Delete"
+            >&#x2715;</button>
+          </form>
+        </div>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="todo-empty">No to-dos yet. Add one above.</p>
+    {% endif %}
+  </div>
+
+  <!-- Announcements preview -->
+  <div class="card">
+    <div class="card-title">
+      Family Announcements
+      <span class="badge">{{ announcements|length }}</span>
+    </div>
+
+    {% if announcements %}
+      {% for ann in announcements %}
+      <div class="ann-preview">
+        <div class="ann-preview-title">
+          {% if ann.pinned %}<span class="pill pill-pinned" style="margin-right:0.35rem;">Pinned</span>{% endif %}
+          {{ ann.title }}
+        </div>
+        {% if ann.body %}
+        <div class="text-muted" style="font-size:0.8rem;margin-top:0.15rem;">
+          {{ ann.body[:100] }}{% if ann.body|length > 100 %}&hellip;{% endif %}
+        </div>
+        {% endif %}
+        <div class="ann-preview-meta">
+          by {{ ann.author or 'unknown' }} &mdash;
+          {{ ann.created_at[:16].replace('T', ' ') if 'T' in ann.created_at else ann.created_at[:16] }}
+        </div>
+      </div>
+      {% endfor %}
+      <a class="see-all-link" href="{{ url_for('board') }}">See all announcements &rarr;</a>
+    {% else %}
+      <p class="todo-empty">No announcements yet.</p>
+      <a class="see-all-link" href="{{ url_for('board') }}">Go to board &rarr;</a>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Notes quick-link -->
+{% if session.role != 'guest' %}
+<div class="mt-3">
+  <a href="{{ url_for('notes_list') }}" class="btn btn-ghost">
+    View My Notes &rarr;
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  (function () {
+    var greetEl = document.getElementById('greeting-text');
+    var dateEl  = document.getElementById('date-display');
+    var h = new Date().getHours();
+    var salutation = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    greetEl.textContent = salutation + ', {{ session.username }}.';
+
+    var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var now    = new Date();
+    dateEl.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+  })();
+</script>
+{% endblock %}

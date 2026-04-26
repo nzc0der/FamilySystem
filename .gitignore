@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------
+# Family Dashboard - runtime data (MUST NOT be committed or
+# overwritten by git pull)
+# ---------------------------------------------------------------
+config.json
+data/
+backups/
+logs/
+*.db
+*.db-shm
+*.db-wal

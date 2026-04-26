@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Notes - Family Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .note-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .note-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+
+  .note-card-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text);
+  }
+
+  .note-card-body {
+    color: var(--color-muted);
+    font-size: 0.83rem;
+    white-space: pre-wrap;
+    line-height: 1.55;
+    flex: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+  }
+
+  .note-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.25rem;
+  }
+
+  .note-meta { font-size: 0.72rem; color: var(--color-muted); }
+
+  /* ---------------------------------------------------------------
+     Editor modal
+  --------------------------------------------------------------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    animation: fadeOverlay 0.2s ease;
+  }
+
+  @keyframes fadeOverlay {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .modal-overlay.hidden { display: none; }
+
+  .modal-box {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 560px;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.6);
+    animation: slideUp 0.25s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .modal-header h2 { font-size: 1.05rem; font-weight: 600; }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+
+  .modal-close:hover { color: var(--color-text); }
+
+  #note-content-area { min-height: 140px; font-size: 0.9rem; }
+
+  .modal-footer {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+
+  .empty-notes {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-muted);
+  }
+
+  .empty-notes p { margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header flex items-center justify-between">
+  <div>
+    <h1>My Notes</h1>
+    <p class="text-muted">{{ notes|length }} note{% if notes|length != 1 %}s{% endif %}</p>
+  </div>
+  {% if session.role != 'guest' %}
+  <button id="new-note-btn" class="btn btn-primary" onclick="openEditor(null, '', '')">
+    + New Note
+  </button>
+  {% endif %}
+</div>
+
+<!-- Notes grid -->
+{% if notes %}
+<div class="notes-grid">
+  {% for note in notes %}
+  <div class="note-card">
+    <div class="note-card-title">{{ note.title or 'Untitled' }}</div>
+    <div class="note-card-body">{{ note.content or '' }}</div>
+    <div class="note-card-footer">
+      <span class="note-meta">
+        {{ note.updated_at[:16].replace('T', ' ') if 'T' in note.updated_at else note.updated_at[:16] }}
+      </span>
+      {% if session.role != 'guest' %}
+      <div class="flex gap-1">
+        <button
+          id="note-edit-{{ note.id }}"
+          class="btn btn-ghost btn-sm"
+          onclick="openEditor({{ note.id }}, {{ note.title|tojson }}, {{ note.content|tojson }})"
+        >Edit</button>
+        <form method="POST" action="{{ url_for('note_delete', note_id=note.id) }}" style="display:inline;">
+          <button
+            id="note-del-{{ note.id }}"
+            type="submit"
+            class="btn btn-danger btn-sm"
+          >Delete</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-notes">
+  <p>No notes yet. Create your first one.</p>
+  {% if session.role != 'guest' %}
+  <button class="btn btn-primary" onclick="openEditor(null, '', '')">Create Note</button>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Note editor modal -->
+{% if session.role != 'guest' %}
+<div id="note-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 id="modal-heading">New Note</h2>
+      <button class="modal-close" onclick="closeEditor()" aria-label="Close">&times;</button>
+    </div>
+    <form id="note-form" method="POST" action="{{ url_for('note_save') }}">
+      <input type="hidden" id="note-id-field" name="note_id" value="" />
+      <div class="form-group">
+        <label for="note-title-field">Title</label>
+        <input id="note-title-field" type="text" name="title" placeholder="Note title..." maxlength="200" />
+      </div>
+      <div class="form-group">
+        <label for="note-content-area">Content</label>
+        <textarea id="note-content-area" name="content" placeholder="Write your note here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" onclick="closeEditor()">Cancel</button>
+        <button id="note-save-btn" type="submit" class="btn btn-primary">Save Note</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function openEditor(noteId, title, content) {
+    var modal   = document.getElementById('note-modal');
+    var heading = document.getElementById('modal-heading');
+    var idField = document.getElementById('note-id-field');
+    var titleF  = document.getElementById('note-title-field');
+    var contentF= document.getElementById('note-content-area');
+
+    idField.value  = noteId || '';
+    titleF.value   = title  || '';
+    contentF.value = content || '';
+    heading.textContent = noteId ? 'Edit Note' : 'New Note';
+    modal.classList.remove('hidden');
+    titleF.focus();
+  }
+
+  function closeEditor() {
+    document.getElementById('note-modal').classList.add('hidden');
+  }
+
+  // Close modal on overlay click.
+  document.getElementById('note-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditor();
+  });
+
+  // Close on Escape.
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeEditor();
+  });
+</script>
+{% endblock %}

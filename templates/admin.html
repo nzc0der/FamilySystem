@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Family Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 700px) { .admin-grid { grid-template-columns: 1fr; } }
+
+  .backup-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .backup-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.82rem;
+    gap: 0.5rem;
+  }
+
+  .backup-name { font-family: monospace; color: var(--color-text); flex: 1; word-break: break-all; }
+  .backup-size { color: var(--color-muted); white-space: nowrap; }
+
+  .update-section { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .info-row:last-child { border-bottom: none; }
+
+  .info-label { font-weight: 500; color: var(--color-text); min-width: 120px; }
+  .info-value { font-family: monospace; word-break: break-all; }
+
+  .danger-zone {
+    border-color: rgba(248,113,113,0.3);
+  }
+
+  .danger-zone .card-title { color: var(--color-danger); }
+
+  .empty-backups {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Admin Panel</h1>
+  <p class="text-muted">System management, updates, and backups.</p>
+</div>
+
+<div class="admin-grid">
+
+  <!-- Update section -->
+  <div class="card">
+    <div class="card-title">GitHub Auto-Update</div>
+    <div class="update-section">
+      <p style="font-size:0.875rem; color: var(--color-muted);">
+        Pulls the latest code from the configured GitHub remote.
+        The database and config.json are backed up before any pull.
+        If the pull fails, the backup is automatically restored.
+        A successful update restarts the server via systemd.
+      </p>
+      <form id="admin-update-form" method="POST" action="{{ url_for('admin_update') }}">
+        <button id="run-update-btn" type="submit" class="btn btn-primary">
+          Run Update Now
+        </button>
+      </form>
+      <p style="font-size:0.75rem; color: var(--color-muted);">
+        The auto-update thread also runs every hour in the background.
+        Manual updates are safe to trigger at any time.
+      </p>
+    </div>
+  </div>
+
+  <!-- System info -->
+  <div class="card">
+    <div class="card-title">System Info</div>
+    <div>
+      <div class="info-row">
+        <span class="info-label">Project root</span>
+        <span class="info-value">{{ config.project_root }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Database</span>
+        <span class="info-value">{{ config.db_path }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Backups dir</span>
+        <span class="info-value">{{ config.backup_dir }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Backups list -->
+<div class="card mt-3">
+  <div class="card-title">
+    Recent Backups
+    <span class="badge">{{ backups|length }}</span>
+  </div>
+
+  {% if backups %}
+  <ul class="backup-list">
+    {% for bk in backups %}
+    <li class="backup-item">
+      <span class="backup-name">{{ bk.name }}</span>
+      <span class="backup-size">{{ bk.size_kb }} KB</span>
+      {% if bk.name.endswith('.db') %}
+      <form method="POST" action="{{ url_for('admin_restore') }}">
+        <input type="hidden" name="backup_name" value="{{ bk.name }}" />
+        <button
+          id="restore-{{ loop.index }}"
+          type="submit"
+          class="btn btn-ghost btn-sm"
+          onclick="return confirm('Restore database from {{ bk.name }}? The current database will be overwritten.');"
+        >Restore</button>
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty-backups">No backups found. They are created automatically before each update.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
