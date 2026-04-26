@@ -411,6 +411,25 @@ def _register_routes(app: Flask) -> None:
         cfg = settings.load_config()
         return render_template("admin.html", backups=backups[:20], config=cfg, users=users)
 
+    @app.route("/admin/users/add", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_user_add():
+        username = request.form.get("username", "").strip().lower()
+        password = request.form.get("password", "")
+        role = request.form.get("role", "user")
+
+        if not username or not password:
+            flash("Username and password are required.", "warning")
+            return redirect(url_for("admin_panel"))
+
+        try:
+            settings.add_user(username, password, role)
+            flash(f"User '{username}' created successfully.", "success")
+        except Exception as e:
+            flash(f"Error creating user: {e}", "danger")
+        return redirect(url_for("admin_panel"))
+
     @app.route("/admin/update", methods=["POST"])
     @login_required
     @admin_required

@@ -170,14 +170,24 @@
   .bookmark-add-form input { flex: 1; min-width: 100px; }
   
   .weather-container {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 1rem; text-align: center; height: 100%; min-height: 150px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.5rem; height: 100%; min-height: 150px;
+    background: linear-gradient(135deg, rgba(108,143,255,0.15), rgba(167,139,250,0.15));
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
   }
-  .weather-temp { font-size: 2.5rem; font-weight: 700; color: var(--color-text); line-height: 1; margin: 0.5rem 0; }
-  .weather-desc { font-size: 0.95rem; color: var(--color-primary); font-weight: 500; text-transform: capitalize; }
-  .weather-meta { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.5rem; }
-  .weather-icon { font-size: 3rem; line-height: 1; }
-  .weather-loading { color: var(--color-muted); font-size: 0.9rem; animation: pulse 1.5s infinite; }
+  .weather-info {
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .weather-temp { font-size: 3.2rem; font-weight: 800; color: var(--color-text); line-height: 1; margin-bottom: 0.3rem; }
+  .weather-desc { font-size: 1.1rem; color: var(--color-primary); font-weight: 600; text-transform: capitalize; }
+  .weather-location { font-size: 0.85rem; color: var(--color-muted); font-weight: 500; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.3rem; }
+  .weather-meta { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.2rem; }
+  .weather-icon { font-size: 4rem; line-height: 1; z-index: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+  .weather-loading { color: var(--color-muted); font-size: 0.9rem; animation: pulse 1.5s infinite; text-align: center; width: 100%; }
   
   @keyframes pulse {
     0% { opacity: 0.6; }
@@ -224,10 +234,20 @@
     {% set pct = ((done_count / total * 100) | int) if total > 0 else 0 %}
     <div class="progress-row">
       <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width: {{ pct }}%;"></div>
+        <div class="progress-bar-fill" style="width: 0%;" data-pct="{{ pct }}"></div>
       </div>
       <span class="progress-label">{{ done_count }}/{{ total }} done</span>
     </div>
+
+    <script>
+      (function() {
+        document.querySelectorAll('.progress-bar-fill[data-pct]').forEach(function(el) {
+          setTimeout(function() {
+            el.style.width = el.getAttribute('data-pct') + '%';
+          }, 50);
+        });
+      })();
+    </script>
 
     <!-- Add form -->
     <form id="todo-add-form" method="POST" action="{{ url_for('todo_add') }}" class="todo-input-row">
@@ -404,10 +424,9 @@
   </div>
 
   <!-- Weather Widget -->
-  <div class="card">
-    <div class="card-title">Current Weather</div>
+  <div class="card" style="padding: 0; border: none; background: transparent;">
     <div class="weather-container" id="weather-widget">
-      <div class="weather-loading">Detecting location & fetching weather...</div>
+      <div class="weather-loading">Fetching weather for Ormond...</div>
     </div>
   </div>
 
@@ -439,8 +458,11 @@
     dateEl.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
 
     // Weather Widget Logic
-    function fetchWeather(lat, lon) {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&windspeed_unit=mph`;
+    function fetchWeather() {
+      // Ormond, Melbourne, Victoria, Australia
+      const lat = -37.9034;
+      const lon = 145.0416;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius&windspeed_unit=kmh`;
       fetch(url)
         .then(res => res.json())
         .then(data => {
@@ -465,39 +487,24 @@
           }
 
           document.getElementById('weather-widget').innerHTML = `
+            <div class="weather-info">
+              <div class="weather-temp">${Math.round(w.temperature)}&deg;C</div>
+              <div class="weather-desc">${desc}</div>
+              <div class="weather-location">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Ormond, VIC
+              </div>
+              <div class="weather-meta">Wind: ${w.windspeed} km/h</div>
+            </div>
             <div class="weather-icon">${icon}</div>
-            <div class="weather-temp">${Math.round(w.temperature)}&deg;F</div>
-            <div class="weather-desc">${desc}</div>
-            <div class="weather-meta">Wind: ${w.windspeed} mph</div>
           `;
         })
         .catch(err => {
-          document.getElementById('weather-widget').innerHTML = `<p class="text-muted">Weather unavailable.</p>`;
+          document.getElementById('weather-widget').innerHTML = `<p class="text-muted" style="padding:1.5rem; text-align:center; width:100%;">Weather unavailable.</p>`;
         });
     }
 
-    // Try HTML5 geolocation first, fallback to IP-based location via ipapi
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => { fetchWeather(position.coords.latitude, position.coords.longitude); },
-        (error) => { fetchFallbackWeather(); },
-        { timeout: 5000 }
-      );
-    } else {
-      fetchFallbackWeather();
-    }
-
-    function fetchFallbackWeather() {
-      fetch('https://ipapi.co/json/')
-        .then(res => res.json())
-        .then(data => {
-          if(data.latitude && data.longitude) fetchWeather(data.latitude, data.longitude);
-          else throw new Error("No location");
-        })
-        .catch(err => {
-          document.getElementById('weather-widget').innerHTML = `<p class="text-muted">Location access denied/unavailable.</p>`;
-        });
-    }
+    fetchWeather();
   })();
 </script>
 {% endblock %}
