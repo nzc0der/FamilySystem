@@ -817,10 +817,11 @@ if __name__ == "__main__":
 
     # --- Create and run Flask application ---
     app = create_app()
-    logger.info("Starting Family Dashboard server on 0.0.0.0:5000")
+    port = 8000
+    logger.info("Starting Family Dashboard server on 0.0.0.0:%d", port)
     app.run(
         host="0.0.0.0",
-        port=5000,
+        port=port,
         debug=False,
         threaded=True,
         use_reloader=False,  # We handle restarts via systemd, not Flask's reloader.

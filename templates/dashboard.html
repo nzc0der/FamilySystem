@@ -10,14 +10,15 @@
   }
 
   .greeting {
-    font-size: 2.25rem;
+    font-size: 2.75rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, var(--color-text) 30%, var(--color-primary) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 50%, var(--color-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    display: inline-block;
   }
 
   .date-display {
@@ -179,6 +180,7 @@
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
     border-radius: 4px;
     transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 10px var(--color-primary);
   }
 
   /* ---------------------------------------------------------------
@@ -274,7 +276,7 @@
      Weather Widget
   --------------------------------------------------------------- */
   .weather-card {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(135deg, var(--color-primary-dk) 0%, var(--color-accent) 100%);
     border-radius: 24px;
     padding: 1.75rem;
     color: white;
@@ -482,7 +484,7 @@
       </a>
       {% endfor %}
       {% if session.role != 'guest' %}
-      <a href="#" class="link-card" style="border-style: dashed; background: transparent;" onclick="event.preventDefault(); window.location.href='#'; alert('Go to dashboard settings to add links')">
+      <a href="#" class="link-card" style="border-style: dashed; background: transparent;" onclick="event.preventDefault(); window.customConfirm('Bookmarks must be added from the top bar or settings panel.', null, true)">
         <span class="link-icon" style="opacity: 0.5;">+</span>
         <span class="link-label">Add New</span>
       </a>

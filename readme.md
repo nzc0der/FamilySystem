@@ -163,7 +163,7 @@ On any device connected to the **same local Wi-Fi network** as the Pi:
 
 2. Open a browser and navigate to:
    ```
-   http://192.168.1.42:5000
+   http://192.168.1.42:8000
    ```
    Replace `192.168.1.42` with your Pi's actual address.
 
@@ -302,7 +302,7 @@ Common causes:
 |----------------------------------|-----------------------------------------------------------|
 | `ModuleNotFoundError`            | Run `venv/bin/pip install -r requirements.txt` again      |
 | `Permission denied` on data/     | Run `chown -R pi:pi /home/pi/FamilySystem`                |
-| `Address already in use :5000`   | Another process is on port 5000; kill it or change port   |
+| `Address already in use :8000`   | Another process is on port 8000; kill it or change port   |
 | `config.json: malformed JSON`    | Restore from the latest `config_*.json` backup            |
 
 ### Forgot admin password

@@ -24,12 +24,16 @@ import settings
 def main():
     print("=== FAMILY DASHBOARD SYSTEM RESET ===")
     print("This will PERMANENTLY DELETE all users, notes, to-dos, and board posts.")
-    print("Backups and system configuration (config.json) will NOT be affected.")
+    print("System configuration (config.json) WILL BE DELETED. Backups will NOT be affected.")
     
     confirm = input("\nType 'RESET' to confirm deletion: ").strip()
     if confirm != "RESET":
         print("Reset cancelled.")
         return
+
+    # 1. Reset config (so setup wizard runs next time)
+    print("Removing config.json...")
+    settings.reset_config()
 
     # 1. Delete the database
     db_path = settings._db_path()

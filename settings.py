@@ -7,7 +7,7 @@ safe to call from any context.
 
 Responsibilities:
   - Loading / saving / resetting config.json.
-  - SQLite user management (get, add, verify).
+  - SQLite user management (get, add, verify).\
   - System-level helpers (is_initialized, path resolution).
 """
 

@@ -42,13 +42,15 @@
   }
   .user-card {
     background: var(--color-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    transition: border-color var(--transition);
+    transition: all var(--transition);
   }
   .user-card:hover { border-color: var(--color-primary); }
   .user-card-header {
@@ -164,9 +166,9 @@
         {% endif %}
         
         {% if session.user_id != u.id and u.role != 'guest' %}
-          <form method="POST" action="{{ url_for('admin_user_delete') }}" style="margin-left: auto;">
+          <form method="POST" action="{{ url_for('admin_user_delete') }}" style="margin-left: auto;" data-confirm="Delete {{ u.username }}? This cannot be undone.">
             <input type="hidden" name="user_id" value="{{ u.id }}">
-            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete {{ u.username }}? This cannot be undone.');">Delete</button>
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
           </form>
         {% endif %}
       </div>
@@ -232,9 +234,9 @@
           <span style="font-size: 0.7rem; color: var(--color-muted);">{{ bk.size_kb }} KB &bull; SQLite DB</span>
         </div>
         {% if bk.name.endswith('.db') %}
-        <form method="POST" action="{{ url_for('admin_restore') }}">
+        <form method="POST" action="{{ url_for('admin_restore') }}" data-confirm="Restore this backup?">
           <input type="hidden" name="backup_name" value="{{ bk.name }}" />
-          <button type="submit" class="btn btn-ghost btn-sm" onclick="return confirm('Restore this backup?');">Restore State</button>
+          <button type="submit" class="btn btn-ghost btn-sm">Restore State</button>
         </form>
         {% endif %}
       </li>

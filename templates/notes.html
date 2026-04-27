@@ -13,6 +13,8 @@
 
   .note-card {
     background: var(--color-surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 1.25rem;
@@ -20,7 +22,7 @@
     flex-direction: column;
     gap: 0.5rem;
     box-shadow: var(--shadow);
-    transition: border-color 0.2s, transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     animation: fadeIn 0.25s ease;
   }
@@ -31,8 +33,9 @@
   }
 
   .note-card:hover {
-    border-color: var(--color-primary);
-    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
+    transform: translateY(-4px);
   }
 
   .note-card-title {
@@ -173,7 +176,7 @@
           data-note-title="{{ note.title }}"
           data-note-content="{{ note.content }}"
         >Edit</button>
-        <form method="POST" action="{{ url_for('note_delete', note_id=note.id) }}" style="display:inline;">
+        <form method="POST" action="{{ url_for('note_delete', note_id=note.id) }}" style="display:inline;" data-confirm="Delete this note?">
           <button
             id="note-del-{{ note.id }}"
             type="submit"
