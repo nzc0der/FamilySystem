@@ -234,6 +234,9 @@ def _register_routes(app: Flask) -> None:
     @app.route("/todos/add", methods=["POST"])
     @login_required
     def todo_add():
+        if session.get("role") == "guest":
+            flash("Guests cannot add to-dos.", "warning")
+            return redirect(url_for("dashboard"))
         content = request.form.get("content", "").strip()
         if content:
             settings.add_todo(session["user_id"], content)
@@ -262,6 +265,9 @@ def _register_routes(app: Flask) -> None:
     @app.route("/notes/save", methods=["POST"])
     @login_required
     def note_save():
+        if session.get("role") == "guest":
+            flash("Guests cannot save notes.", "warning")
+            return redirect(url_for("notes_list"))
         note_id_raw = request.form.get("note_id") or None
         note_id = int(note_id_raw) if note_id_raw else None
         title = request.form.get("title", "").strip()
@@ -358,6 +364,9 @@ def _register_routes(app: Flask) -> None:
     @app.route("/events/add", methods=["POST"])
     @login_required
     def event_add():
+        if session.get("role") == "guest":
+            flash("Guests cannot add events.", "warning")
+            return redirect(url_for("calendar"))
         title = request.form.get("title", "").strip()
         event_date = request.form.get("event_date", "").strip()
         end_date = request.form.get("end_date", "").strip()
@@ -398,9 +407,9 @@ def _register_routes(app: Flask) -> None:
             flash("You do not have permission to add shopping items.", "danger")
             return redirect(url_for("shopping"))
         
-        item_name = request.form.get("item_name", "").strip()
-        if item_name:
-            settings.add_shopping_item(item_name, session["user_id"])
+        content = request.form.get("content", "").strip()
+        if content:
+            settings.add_shopping_item(content, session["user_id"])
         return redirect(url_for("shopping"))
 
     @app.route("/shopping/delete/<int:item_id>", methods=["POST"])

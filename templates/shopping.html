@@ -5,146 +5,108 @@
 {% block extra_head %}
 <style>
   .shopping-container {
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
   }
-  
-  .shopping-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-  
-  .shopping-item {
+
+  .item-card {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 0.75rem;
     background: var(--color-surface);
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius);
     border: 1px solid var(--color-border);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: var(--radius);
+    transition: all var(--transition);
   }
-  
-  .shopping-item:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    background: rgba(39, 39, 42, 0.8);
-    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.3);
+
+  .item-card:hover {
     transform: translateX(4px);
+    border-color: rgba(255, 255, 255, 0.1);
   }
-  
+
   .item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
+    flex: 1;
   }
-  
+
   .item-name {
-    font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: var(--color-text);
   }
-  
+
   .item-meta {
     font-size: 0.75rem;
     color: var(--color-muted);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  
-  .item-meta .dot {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--color-border);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
   }
 
-  .shopping-add-form {
-    display: flex;
-    gap: 0.75rem;
+  .input-card {
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(244, 114, 182, 0.1));
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    padding: 1.5rem;
     margin-bottom: 2rem;
-    background: var(--color-surface);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 1.25rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
   }
-  
-  @media (max-width: 480px) {
-    .shopping-add-form {
-      flex-direction: column;
-      padding: 1rem;
-    }
-    .shopping-add-form button {
-      width: 100%;
-    }
-    .shopping-item {
-      padding: 0.85rem 1rem;
-    }
+
+  .empty-shopping {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--color-border);
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <h1>Shopping List</h1>
-  <p class="text-muted">Manage items the family needs to purchase.</p>
-</div>
-
 <div class="shopping-container">
-  {% if session.shopping_permission in ['add', 'full'] or session.role == 'admin' %}
-  <form id="shopping-add-form" method="POST" action="{{ url_for('shopping_add') }}" class="shopping-add-form">
-    <input 
-      type="text" 
-      name="item_name" 
-      placeholder="What do we need?" 
-      required 
-      autofocus
-      style="flex: 1;" 
-    />
-    <button type="submit" class="btn btn-primary">
-      Add Item
-    </button>
-  </form>
+  <div class="section-header">
+    <div class="section-title">
+      <span>🛒</span>
+      Family Shopping List
+    </div>
+    <span class="badge" style="background: var(--color-primary); color: white; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; font-weight: 800;">{{ items|length }} Items</span>
+  </div>
+
+  {% if session.role != 'guest' %}
+  <div class="card input-card">
+    <form method="POST" action="{{ url_for('shopping_add') }}" style="display: flex; gap: 0.75rem;">
+      <input type="text" name="content" placeholder="Add something to the list (e.g. 2L Milk)..." required maxlength="200" style="flex: 1; border-color: rgba(255,255,255,0.1);">
+      <button type="submit" class="btn btn-primary" style="padding: 0 1.5rem; height: 52px; border-radius: 14px;">Add Item</button>
+    </form>
+  </div>
   {% endif %}
 
-  <div class="card">
-    <div class="card-title">
-      Current List
-      <span class="badge">{{ items|length }}</span>
+  <div class="items-list">
+    {% for item in items %}
+    <div class="item-card">
+      <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+        🍎
+      </div>
+      <div class="item-info">
+        <div class="item-name">{{ item.content }}</div>
+        <div class="item-meta">Added by {{ item.author|capitalize }} • {{ item.created_at[:10] }}</div>
+      </div>
+      
+      {% if session.role != 'guest' %}
+      <form method="POST" action="{{ url_for('shopping_delete', item_id=item.id) }}">
+        <button type="submit" class="btn btn-ghost" style="padding: 0.5rem; border-radius: 10px; width: 40px; height: 40px; color: var(--color-danger); border-color: rgba(248,113,113,0.1);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      </form>
+      {% endif %}
     </div>
+    {% endfor %}
 
-    {% if items %}
-    <ul class="shopping-list">
-      {% for item in items %}
-      <li class="shopping-item">
-        <div class="item-info">
-          <div class="item-name">{{ item.item_name }}</div>
-          <div class="item-meta">
-            <span>Added by {{ item.added_by_name|capitalize or 'Unknown' }}</span>
-            <div class="dot"></div>
-            <span>{{ item.created_at[:10] if item.created_at else 'Recently' }}</span>
-          </div>
-        </div>
-        
-        {% if session.shopping_permission == 'full' or session.role == 'admin' %}
-        <form method="POST" action="{{ url_for('shopping_delete', item_id=item.id) }}" style="margin: 0;" data-confirm="Remove this item?">
-          <button type="submit" class="btn btn-danger btn-sm" title="Remove Item">
-            &#x2715;
-          </button>
-        </form>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <div style="text-align: center; color: var(--color-muted); padding: 3rem 1rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">🛒</div>
-      <p>The shopping list is empty.</p>
-      <p style="font-size: 0.85rem; margin-top: 0.5rem;">Everything we need is already at home.</p>
+    {% if not items %}
+    <div class="empty-shopping">
+      <div style="font-size: 3.5rem; margin-bottom: 1rem;">🧺</div>
+      <h2 style="font-weight: 800; margin-bottom: 0.5rem;">List is empty</h2>
+      <p style="color: var(--color-muted);">Looks like you're all stocked up!</p>
     </div>
     {% endif %}
   </div>
