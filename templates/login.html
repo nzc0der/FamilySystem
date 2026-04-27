@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Family Dashboard{% endblock %}
+{% block title %}Login - Family System{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -9,148 +9,218 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: radial-gradient(ellipse at 60% 40%, #1a2040 0%, #0f1117 70%);
+    background: radial-gradient(circle at top right, #1a2040 0%, #0b0c10 100%);
+    overflow-x: hidden;
   }
 
-  .page-wrapper {
-    padding: 1rem;
+  .login-container {
     width: 100%;
-    max-width: 420px;
-    box-sizing: border-box;
+    max-width: 440px;
+    padding: 1.5rem;
+    position: relative;
+    z-index: 1;
   }
+
+  /* Decorative background blobs */
+  .bg-blob {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: var(--color-primary);
+    filter: blur(120px);
+    opacity: 0.15;
+    border-radius: 50%;
+    z-index: -1;
+  }
+  .blob-1 { top: -100px; left: -100px; }
+  .blob-2 { bottom: -100px; right: -100px; background: var(--color-accent); }
 
   .login-card {
-    background: linear-gradient(145deg, var(--color-surface), rgba(21, 23, 30, 0.6));
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: var(--radius-lg);
-    padding: 2.5rem 2rem;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    animation: fadeUp 0.35s ease;
+    background: rgba(21, 23, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    animation: loginFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
-    box-sizing: border-box;
   }
 
-  @media (max-width: 480px) {
-    .login-card {
-      padding: 2rem 1.25rem;
-      border-radius: var(--radius);
-    }
-    .page-wrapper {
-      padding: 1rem;
-    }
+  @keyframes loginFadeIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(18px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
   }
 
   .login-logo {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
     background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
-    margin: 0 auto 1.25rem;
-    box-shadow: 0 0 24px rgba(108,143,255,0.35);
+    font-size: 1.8rem;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(130, 161, 255, 0.4);
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
   }
+  .login-logo:hover { transform: rotate(0deg) scale(1.05); }
 
   .login-title {
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 700;
-    margin-bottom: 0.35rem;
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
   }
 
   .login-subtitle {
-    text-align: center;
     color: var(--color-muted);
-    font-size: 0.875rem;
-    margin-bottom: 2rem;
-  }
-
-  .login-card .btn-primary {
-    width: 100%;
-    padding: 0.65rem;
     font-size: 0.95rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-    transition: opacity 0.2s;
   }
 
-  .login-card .btn-primary:hover { opacity: 0.9; }
+  .form-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+    display: block;
+  }
 
-  .guest-link {
+  select, input[type="password"] {
+    height: 52px;
+    padding: 0 1.25rem;
+    font-size: 1rem;
+    background: rgba(31, 34, 45, 0.6);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  select:focus, input[type="password"]:focus {
+    background: var(--color-surface-2);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(130, 161, 255, 0.15);
+  }
+
+  .btn-login {
+    width: 100%;
+    height: 52px;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dk));
+    box-shadow: 0 4px 15px rgba(130, 161, 255, 0.3);
+    border-radius: 14px;
+  }
+  .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(130, 161, 255, 0.4);
+  }
+
+  .guest-login-container {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     text-align: center;
-    margin-top: 1.25rem;
-    font-size: 0.83rem;
-    color: var(--color-muted);
   }
 
-  .guest-link a { color: var(--color-primary); }
+  .btn-guest {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 12px;
+    width: 100%;
+    transition: all 0.2s ease;
+  }
+  .btn-guest:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--color-text);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 1rem;
+    }
+    .login-card {
+      padding: 2.5rem 1.5rem;
+      border-radius: 24px;
+    }
+    .login-title {
+      font-size: 1.5rem;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-card">
-  <div class="login-logo">&#127968;</div>
-  <h1 class="login-title">Welcome back</h1>
-  <p class="login-subtitle">Sign in to your family dashboard</p>
+<div class="login-container">
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
 
-  {% with messages = get_flashed_messages(with_categories=True) %}
-    {% if messages %}
-      <ul class="flash-list">
-        {% for category, message in messages %}
-          <li class="flash flash-{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
-
-  <form id="login-form" method="POST" action="{{ url_for('login') }}" autocomplete="off">
-    <div class="form-group">
-      <label for="username">Select User</label>
-      <select id="username" name="username" required autofocus>
-        <option value="" disabled selected>Select your profile...</option>
-        {% for u in users %}
-          <option value="{{ u.username }}">{{ u.username|capitalize }}</option>
-        {% endfor %}
-      </select>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🏠</div>
+      <h1 class="login-title">Welcome</h1>
+      <p class="login-subtitle">Sign in to the Family System</p>
     </div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input
-        id="password"
-        type="password"
-        name="password"
-        placeholder="Enter your password"
-        autocomplete="current-password"
-      />
-    </div>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        <ul class="flash-list" style="margin-bottom: 2rem;">
+          {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
 
-    <button id="login-submit" type="submit" class="btn btn-primary">Sign In</button>
-  </form>
+    <form id="login-form" method="POST" action="{{ url_for('login') }}" autocomplete="off">
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label for="username">Profile</label>
+        <select id="username" name="username" required autofocus>
+          <option value="" disabled selected>Choose your profile...</option>
+          {% for u in users %}
+            <option value="{{ u.username }}">{{ u.username|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-  <div class="guest-link">
-    Browsing without an account?
-    <form method="POST" action="{{ url_for('login') }}" style="display:inline;">
-      <input type="hidden" name="username" value="guest" />
-      <input type="hidden" name="password" value="" />
-      <button
-        id="guest-login"
-        type="submit"
-        style="background:none;border:none;cursor:pointer;font:inherit;"
-      >
-        <a href="#">Continue as Guest</a>
+      <div class="form-group" style="margin-bottom: 2rem;">
+        <label for="password">Security Code</label>
+        <input
+          id="password"
+          type="password"
+          name="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button id="login-submit" type="submit" class="btn btn-primary btn-login">
+        Sign In
       </button>
     </form>
+
+    <div class="guest-login-container">
+      <form method="POST" action="{{ url_for('login') }}">
+        <input type="hidden" name="username" value="guest" />
+        <input type="hidden" name="password" value="" />
+        <button id="guest-login" type="submit" class="btn-guest">
+          Continue as Guest
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -1,56 +1,124 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Family Dashboard{% endblock %}
+{% block title %}Dashboard - Family System{% endblock %}
 
 {% block extra_head %}
 <style>
+  .greeting-container {
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
   .greeting {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    background: linear-gradient(90deg, var(--color-text), var(--color-accent));
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--color-text) 30%, var(--color-primary) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
+  .date-display {
+    font-size: 1rem;
+    color: var(--color-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .date-display::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 2px;
+  }
+
+  /* ---------------------------------------------------------------
+     Section Headers
+  --------------------------------------------------------------- */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .section-title i {
+    color: var(--color-primary);
+    font-size: 1.2rem;
+  }
+
   /* ---------------------------------------------------------------
      To-do section
   --------------------------------------------------------------- */
-  .todo-input-row {
+  .todo-card {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    flex-direction: column;
+    height: 100%;
   }
 
-  .todo-input-row input { flex: 1; }
+  .todo-input-row {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 0.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
 
-  .todo-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+  .todo-input-row input { 
+    flex: 1; 
+    background: transparent;
+    border: none;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+  }
+  .todo-input-row input:focus { box-shadow: none; border: none; }
+
+  .todo-list { 
+    list-style: none; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.6rem; 
+    flex: 1;
+  }
 
   .todo-item {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    background: rgba(255, 255, 255, 0.02);
+    gap: 0.75rem;
+    background: var(--color-surface);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius);
-    padding: 0.6rem 0.85rem;
-    transition: transform var(--transition), border-color var(--transition), opacity 0.2s;
-    animation: slideIn 0.2s ease;
+    border-radius: 14px;
+    padding: 0.85rem 1rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  
   .todo-item:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-primary);
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-8px); }
-    to   { opacity: 1; transform: translateX(0); }
+    border-color: rgba(130, 161, 255, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateX(4px);
   }
 
   .todo-item.done {
-    opacity: 0.45;
+    background: rgba(255, 255, 255, 0.01);
     border-color: transparent;
+    opacity: 0.6;
   }
 
   .todo-item.done .todo-text {
@@ -58,426 +126,432 @@
     color: var(--color-muted);
   }
 
-  .todo-text { flex: 1; font-size: 0.9rem; }
-
-  .todo-actions { display: flex; gap: 0.3rem; }
+  .todo-text { flex: 1; font-size: 0.95rem; font-weight: 500; }
 
   .todo-check {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
     border: 2px solid var(--color-border);
     cursor: pointer;
     background: transparent;
-    transition: background 0.2s, border-color 0.2s;
+    transition: all 0.2s ease;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
+  .todo-item:hover .todo-check {
+    border-color: var(--color-primary);
+  }
+
   .todo-item.done .todo-check {
     background: var(--color-success);
     border-color: var(--color-success);
-  }
-
-  .todo-empty {
-    color: var(--color-muted);
-    font-size: 0.875rem;
-    text-align: center;
-    padding: 1.5rem 0;
+    color: white;
   }
 
   /* ---------------------------------------------------------------
-     Announcement preview
+     Progress Bar
   --------------------------------------------------------------- */
-  .ann-preview {
-    border-left: 3px solid var(--color-accent);
-    padding: 0.6rem 0.9rem;
-    background: rgba(167,139,250,0.05);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    margin-bottom: 0.5rem;
+  .progress-section {
+    margin-bottom: 1.5rem;
   }
-
-  .ann-preview-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 0.15rem;
-  }
-
-  .ann-preview-meta {
-    font-size: 0.75rem;
-    color: var(--color-muted);
-  }
-
-  .see-all-link {
-    display: block;
-    text-align: right;
-    font-size: 0.8rem;
-    color: var(--color-primary);
-    margin-top: 0.5rem;
-  }
-
-  /* ---------------------------------------------------------------
-     Progress ring
-  --------------------------------------------------------------- */
-  .progress-row {
+  
+  .progress-info {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 
-  .progress-bar-wrap {
-    flex: 1;
-    height: 6px;
-    background: var(--color-border);
-    border-radius: 999px;
+  .progress-track {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
     overflow: hidden;
   }
 
-  .progress-bar-fill {
+  .progress-fill {
     height: 100%;
-    border-radius: 999px;
     background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-    transition: width 0.4s ease;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  .progress-label {
-    font-size: 0.78rem;
+  /* ---------------------------------------------------------------
+     Announcements
+  --------------------------------------------------------------- */
+  .ann-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .ann-item {
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ann-item.pinned {
+    border-left: 4px solid var(--color-accent);
+    background: rgba(167, 139, 250, 0.05);
+  }
+
+  .ann-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  .ann-body {
+    font-size: 0.9rem;
     color: var(--color-muted);
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .ann-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    font-weight: 500;
+  }
+
+  /* ---------------------------------------------------------------
+     Quick Links
+  --------------------------------------------------------------- */
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .link-card {
+    background: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .link-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--color-primary);
+  }
+
+  .link-icon {
+    font-size: 1.75rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+  }
+
+  .link-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   /* ---------------------------------------------------------------
-     Bookmarks & Weather
+     Weather Widget
   --------------------------------------------------------------- */
-  .bookmark-list {
-    list-style: none; display: grid; gap: 0.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  }
-
-  .bookmark-item {
-    background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius); padding: 0.6rem 0.8rem; display: flex; align-items: center; gap: 0.5rem;
-    transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition); position: relative;
-  }
-  
-  .bookmark-item:hover { transform: translateY(-3px); border-color: var(--color-primary); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-  .bookmark-item a { flex: 1; color: var(--color-text); font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .bookmark-item a:hover { color: var(--color-primary); }
-  .bookmark-icon { font-size: 1.1rem; }
-  .bookmark-del { background: none; border: none; color: var(--color-muted); cursor: pointer; font-size: 0.8rem; padding: 0.2rem; }
-  .bookmark-del:hover { color: var(--color-danger); }
-
-  .bookmark-add-form { display: flex; gap: 0.4rem; margin-top: 1rem; flex-wrap: wrap; }
-  .bookmark-add-form input { flex: 1; min-width: 100px; }
-  
-  .weather-container {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.5rem; height: 100%; min-height: 150px;
-    background: linear-gradient(135deg, rgba(108,143,255,0.15), rgba(167,139,250,0.15));
-    border-radius: var(--radius-lg);
+  .weather-card {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 24px;
+    padding: 1.75rem;
+    color: white;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
   }
-  .weather-info {
-    z-index: 1;
+
+  .weather-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200px;
+    height: 200px;
+    background: var(--color-primary);
+    filter: blur(100px);
+    opacity: 0.1;
+  }
+
+  .weather-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .weather-temp-wrap {
     display: flex;
     flex-direction: column;
   }
-  .weather-temp { font-size: 3.2rem; font-weight: 800; color: var(--color-text); line-height: 1; margin-bottom: 0.3rem; }
-  .weather-desc { font-size: 1.1rem; color: var(--color-primary); font-weight: 600; text-transform: capitalize; }
-  .weather-location { font-size: 0.85rem; color: var(--color-muted); font-weight: 500; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.3rem; }
-  .weather-meta { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.2rem; }
-  .weather-icon { font-size: 4rem; line-height: 1; z-index: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
-  .weather-loading { color: var(--color-muted); font-size: 0.9rem; animation: pulse 1.5s infinite; text-align: center; width: 100%; }
-  
-  @keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+
+  .weather-temp-big {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1;
   }
 
-  .event-list { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
-  .event-item {
-    background: var(--color-surface-2); border: 1px solid var(--color-border);
-    border-radius: var(--radius); padding: 0.6rem 0.8rem;
-    display: flex; flex-direction: column; gap: 0.2rem;
+  .weather-condition {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-top: 0.25rem;
   }
-  .event-header { display: flex; justify-content: space-between; align-items: center; }
-  .event-title { font-weight: 600; font-size: 0.9rem; color: var(--color-text); }
-  .event-date { font-size: 0.8rem; color: var(--color-primary); font-weight: 500; }
-  .event-meta { font-size: 0.75rem; color: var(--color-muted); display: flex; justify-content: space-between; }
-  .event-add-form { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem; }
+
+  .weather-icon-big {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+  }
+
+  .weather-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+  }
+
+  .weather-detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* ---------------------------------------------------------------
+     Responsive
+  --------------------------------------------------------------- */
+  @media (max-width: 768px) {
+    .greeting { font-size: 1.75rem; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <p class="greeting" id="greeting-text">Hello, {{ session.username }}.</p>
-  <p class="text-muted" id="date-display"></p>
+<div class="greeting-container">
+  <h1 class="greeting" id="greeting-text">Hello, {{ session.username }}.</h1>
+  <div class="date-display" id="date-display"></div>
 </div>
 
-<!-- ---------------------------------------------------------------
-     Main grid: to-dos | announcements
---------------------------------------------------------------- -->
 <div class="grid-2">
-
-  <!-- To-dos -->
-  <div class="card">
-    <div class="card-title">
-      My To-Dos
-      <span class="badge" id="todo-count">{{ todos|length }}</span>
+  <!-- To-Dos -->
+  <div class="card todo-card">
+    <div class="section-header">
+      <div class="section-title">
+        <span>✅</span>
+        Personal To-Dos
+      </div>
+      <span class="badge">{{ todos|length }}</span>
     </div>
 
     {% if session.role != 'guest' %}
-    <!-- Progress bar -->
-    {% set done_count = todos | selectattr('done', 'equalto', 1) | list | length %}
-    {% set total = todos | length %}
-    {% set pct = ((done_count / total * 100) | int) if total > 0 else 0 %}
-    <div class="progress-row">
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" style="width: 0%;" data-pct="{{ pct }}"></div>
+    <div class="progress-section">
+      {% set done_count = todos | selectattr('done', 'equalto', 1) | list | length %}
+      {% set total = todos | length %}
+      {% set pct = ((done_count / total * 100) | int) if total > 0 else 0 %}
+      <div class="progress-info">
+        <span>Daily Progress</span>
+        <span>{{ pct }}%</span>
       </div>
-      <span class="progress-label">{{ done_count }}/{{ total }} done</span>
+      <div class="progress-track">
+        <div class="progress-fill" style="width: 0%;" data-pct="{{ pct }}"></div>
+      </div>
     </div>
 
-    <script>
-      (function() {
-        document.querySelectorAll('.progress-bar-fill[data-pct]').forEach(function(el) {
-          setTimeout(function() {
-            el.style.width = el.getAttribute('data-pct') + '%';
-          }, 50);
-        });
-      })();
-    </script>
-
-    <!-- Add form -->
     <form id="todo-add-form" method="POST" action="{{ url_for('todo_add') }}" class="todo-input-row">
       <input
         id="todo-input"
         type="text"
         name="content"
-        placeholder="Add a new to-do..."
+        placeholder="What needs to be done?"
         maxlength="300"
         required
       />
-      <button id="todo-add-btn" type="submit" class="btn btn-primary btn-sm">Add</button>
+      <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.4rem 1rem;">Add</button>
     </form>
     {% endif %}
 
-    <!-- List -->
-    {% if todos %}
     <ul class="todo-list" id="todo-list">
       {% for todo in todos %}
-      <li class="todo-item {% if todo.done %}done{% endif %}" id="todo-{{ todo.id }}">
-        <!-- Toggle -->
-        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}" style="line-height:0;">
-          <button
-            id="todo-toggle-{{ todo.id }}"
-            type="submit"
-            class="todo-check"
-            title="{% if todo.done %}Mark incomplete{% else %}Mark complete{% endif %}"
-            style="border:none;cursor:pointer;"
-          >
+      <li class="todo-item {% if todo.done %}done{% endif %}">
+        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}">
+          <button type="submit" class="todo-check">
             {% if todo.done %}
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path d="M2 5l2.5 2.5L8 2.5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
             {% endif %}
           </button>
         </form>
-
         <span class="todo-text">{{ todo.content }}</span>
-
-        <!-- Delete -->
         {% if session.role != 'guest' %}
-        <div class="todo-actions">
-          <form method="POST" action="{{ url_for('todo_delete', todo_id=todo.id) }}">
-            <button
-              id="todo-del-{{ todo.id }}"
-              type="submit"
-              class="btn btn-danger btn-sm"
-              title="Delete"
-            >&#x2715;</button>
-          </form>
-        </div>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="todo-empty">No to-dos yet. Add one above.</p>
-    {% endif %}
-  </div>
-
-  <!-- Announcements preview -->
-  <div class="card">
-    <div class="card-title">
-      Family Announcements
-      <span class="badge">{{ announcements|length }}</span>
-    </div>
-
-    {% if announcements %}
-      {% for ann in announcements %}
-      <div class="ann-preview">
-        <div class="ann-preview-title">
-          {% if ann.pinned %}<span class="pill pill-pinned" style="margin-right:0.35rem;">Pinned</span>{% endif %}
-          {{ ann.title }}
-        </div>
-        {% if ann.body %}
-        <div class="text-muted" style="font-size:0.8rem;margin-top:0.15rem;">
-          {{ ann.body[:100] }}{% if ann.body|length > 100 %}&hellip;{% endif %}
-        </div>
-        {% endif %}
-        <div class="ann-preview-meta">
-          by {{ ann.author or 'unknown' }} &mdash;
-          {{ ann.created_at[:16].replace('T', ' ') if 'T' in ann.created_at else ann.created_at[:16] }}
-        </div>
-      </div>
-      {% endfor %}
-      <a class="see-all-link" href="{{ url_for('board') }}">See all announcements &rarr;</a>
-    {% else %}
-      <p class="todo-empty">No announcements yet.</p>
-      <a class="see-all-link" href="{{ url_for('board') }}">Go to board &rarr;</a>
-    {% endif %}
-  </div>
-
-</div>
-
-<!-- Lower Grid: Bookmarks | Weather | Events -->
-<div class="grid-3 mt-3">
-
-  <!-- Bookmarks -->
-  <div class="card">
-    <div class="card-title">
-      Quick Links
-      <span class="badge">{{ bookmarks|length }}</span>
-    </div>
-
-    {% if bookmarks %}
-    <ul class="bookmark-list">
-      {% for bm in bookmarks %}
-      <li class="bookmark-item">
-        <a href="{{ bm.url }}" target="_blank" rel="noopener noreferrer">
-          <span class="bookmark-icon">{{ bm.icon }}</span>
-          <span title="{{ bm.title }}">{{ bm.title }}</span>
-        </a>
-        {% if session.role == 'admin' %}
-        <form method="POST" action="{{ url_for('bookmark_delete', bm_id=bm.id) }}" style="display:inline;">
-          <button type="submit" class="bookmark-del" title="Delete Bookmark">&#x2715;</button>
+        <form method="POST" action="{{ url_for('todo_delete', todo_id=todo.id) }}">
+          <button type="submit" class="btn btn-ghost btn-sm" style="border: none; padding: 4px; opacity: 0.5;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </form>
         {% endif %}
       </li>
       {% endfor %}
+      {% if not todos %}
+      <div style="text-align: center; padding: 2rem 0; color: var(--color-muted);">
+        <p>All caught up! 🌟</p>
+      </div>
+      {% endif %}
     </ul>
-    {% else %}
-    <p class="todo-empty" style="padding: 0.5rem 0;">No quick links added yet.</p>
-    {% endif %}
-
-    {% if session.role != 'guest' %}
-    <form method="POST" action="{{ url_for('bookmark_add') }}" class="bookmark-add-form">
-      <input type="text" name="icon" placeholder="Emoji 🌐" maxlength="5" style="flex: 0 0 60px; text-align: center;" />
-      <input type="text" name="title" placeholder="Title" required style="flex:1;" />
-      <input type="url" name="url" placeholder="https://..." required style="width:100%; margin-top: 0.4rem;" />
-      <button type="submit" class="btn btn-primary btn-sm" style="width:100%; margin-top: 0.4rem;">Add Link</button>
-    </form>
-    {% endif %}
   </div>
 
-  <!-- Events Widget -->
+  <!-- Announcements -->
   <div class="card">
-    <div class="card-title">
-      Upcoming Events
-      <span class="badge">{{ events|length }}</span>
+    <div class="section-header">
+      <div class="section-title">
+        <span>📢</span>
+        Latest Updates
+      </div>
+      <a href="{{ url_for('board') }}" class="btn btn-ghost btn-sm">View Board</a>
     </div>
 
-    {% if events %}
-    <ul class="event-list">
-      {% for ev in events %}
-      <li class="event-item">
-        <div class="event-header">
-          <span class="event-title">{{ ev.title }}</span>
-          {% if session.role == 'admin' or session.user_id == ev.author_id %}
-          <form method="POST" action="{{ url_for('event_delete', event_id=ev.id) }}" style="display:inline;">
-            <button type="submit" class="bookmark-del" title="Delete Event">&#x2715;</button>
-          </form>
-          {% endif %}
+    <div class="ann-list">
+      {% for ann in announcements %}
+      <div class="ann-item {% if ann.pinned %}pinned{% endif %}">
+        <div class="ann-title">
+          {{ ann.title }}
         </div>
-        <div class="event-date">
-          📅 {{ ev.event_date[:10] }} {% if ev.event_date[11:16] %}{{ ev.event_date[11:16] }}{% endif %}
-          {% if ev.end_date %}
-            &rarr; {{ ev.end_date[:10] }} {% if ev.end_date[11:16] %}{{ ev.end_date[11:16] }}{% endif %}
-          {% endif %}
+        {% if ann.body %}
+        <div class="ann-body">
+          {{ ann.body[:120] }}{% if ann.body|length > 120 %}&hellip;{% endif %}
         </div>
-        <div class="event-meta">
-          <span>Added by {{ ev.author or 'unknown' }}</span>
+        {% endif %}
+        <div class="ann-footer">
+          <span>{{ ann.author|capitalize }}</span>
+          <span>{{ ann.created_at[:10] }}</span>
         </div>
-      </li>
+      </div>
       {% endfor %}
-    </ul>
-    {% else %}
-    <p class="todo-empty" style="padding: 0.5rem 0;">No upcoming events.</p>
-    {% endif %}
+      {% if not announcements %}
+      <div style="text-align: center; padding: 2rem 0; color: var(--color-muted);">
+        <p>No new announcements.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
 
-    {% if session.role != 'guest' %}
-    <form method="POST" action="{{ url_for('event_add') }}" class="event-add-form">
-      <input type="text" name="title" placeholder="Event Name" required />
-      <input type="datetime-local" name="event_date" required />
-      <input type="datetime-local" name="end_date" title="End Date (Optional)" />
-      <button type="submit" class="btn btn-primary btn-sm">Add Event</button>
-    </form>
-    {% endif %}
+<div class="grid-3 mt-3">
+  <!-- Weather -->
+  <div class="weather-card" id="weather-widget">
+    <div style="text-align: center; padding: 2rem 0; opacity: 0.5;">Loading weather...</div>
   </div>
 
-  <!-- Weather Widget -->
-  <div class="card" style="padding: 0; border: none; background: transparent;">
-    <div class="weather-container" id="weather-widget">
-      <div class="weather-loading">Fetching weather for Ormond...</div>
+  <!-- Quick Links -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-title">
+        <span>🔗</span>
+        Quick Links
+      </div>
+    </div>
+    
+    <div class="links-grid">
+      {% for bm in bookmarks %}
+      <a href="{{ bm.url }}" target="_blank" class="link-card">
+        <span class="link-icon">{{ bm.icon }}</span>
+        <span class="link-label">{{ bm.title }}</span>
+      </a>
+      {% endfor %}
+      {% if session.role != 'guest' %}
+      <a href="#" class="link-card" style="border-style: dashed; background: transparent;" onclick="event.preventDefault(); window.location.href='#'; alert('Go to dashboard settings to add links')">
+        <span class="link-icon" style="opacity: 0.5;">+</span>
+        <span class="link-label">Add New</span>
+      </a>
+      {% endif %}
     </div>
   </div>
 
-</div>
+  <!-- Upcoming Events -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-title">
+        <span>📅</span>
+        Family Events
+      </div>
+      <a href="{{ url_for('calendar') }}" class="btn btn-ghost btn-sm">Calendar</a>
+    </div>
 
-<!-- Notes quick-link -->
-{% if session.role != 'guest' %}
-<div class="mt-3">
-  <a href="{{ url_for('notes_list') }}" class="btn btn-ghost">
-    View My Notes &rarr;
-  </a>
+    <div class="todo-list">
+      {% for ev in events[:4] %}
+      <div class="todo-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+        <div style="font-weight: 700; font-size: 0.95rem;">{{ ev.title }}</div>
+        <div style="font-size: 0.75rem; color: var(--color-primary); font-weight: 600;">
+          {{ ev.event_date[:10] }}
+        </div>
+      </div>
+      {% endfor %}
+      {% if not events %}
+      <p style="text-align: center; color: var(--color-muted); padding: 1rem 0;">No upcoming events.</p>
+      {% endif %}
+    </div>
+  </div>
 </div>
-{% endif %}
-
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
   (function () {
-    var greetEl = document.getElementById('greeting-text');
-    var dateEl  = document.getElementById('date-display');
-    var h = new Date().getHours();
-    var salutation = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-    greetEl.textContent = salutation + ', {{ session.username }}.';
+    // Progress bar animation
+    document.querySelectorAll('.progress-fill').forEach(el => {
+      setTimeout(() => {
+        el.style.width = el.getAttribute('data-pct') + '%';
+      }, 300);
+    });
 
-    var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var now    = new Date();
-    dateEl.textContent = days[now.getDay()] + ', ' + months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    // Greeting logic
+    const greetEl = document.getElementById('greeting-text');
+    const dateEl  = document.getElementById('date-display');
+    const h = new Date().getHours();
+    const salutation = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    greetEl.textContent = salutation + ', {{ session.username|capitalize }}.';
 
-    // Weather Widget Logic
+    const now = new Date();
+    dateEl.textContent = now.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    // Weather Fetching
     function fetchWeather() {
-      // Ormond, Melbourne, Victoria, Australia
       const lat = -37.9034;
       const lon = 145.0416;
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius&windspeed_unit=kmh`;
+      
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          if(!data.current_weather) throw new Error("Invalid data");
+          if(!data.current_weather) return;
           const w = data.current_weather;
-          
-          // Map WMO codes to descriptions and emojis
           const wmoCodes = {
             0: ['Clear sky', '☀️'], 1: ['Mainly clear', '🌤️'], 2: ['Partly cloudy', '⛅'], 3: ['Overcast', '☁️'],
             45: ['Fog', '🌫️'], 48: ['Depositing rime fog', '🌫️'],
@@ -486,32 +560,27 @@
             71: ['Slight snow', '❄️'], 73: ['Moderate snow', '❄️'], 75: ['Heavy snow', '❄️'],
             95: ['Thunderstorm', '⛈️']
           };
-          
-          let desc = "Unknown";
-          let icon = "🌡️";
-          if (wmoCodes[w.weathercode]) {
-            desc = wmoCodes[w.weathercode][0];
-            icon = wmoCodes[w.weathercode][1];
-          }
+          const [desc, icon] = wmoCodes[w.weathercode] || ['Unknown', '🌡️'];
 
           document.getElementById('weather-widget').innerHTML = `
-            <div class="weather-info">
-              <div class="weather-temp">${Math.round(w.temperature)}&deg;C</div>
-              <div class="weather-desc">${desc}</div>
-              <div class="weather-location">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                Ormond, VIC
+            <div class="weather-main">
+              <div class="weather-temp-wrap">
+                <div class="weather-temp-big">${Math.round(w.temperature)}°</div>
+                <div class="weather-condition">${desc}</div>
               </div>
-              <div class="weather-meta">Wind: ${w.windspeed} km/h</div>
+              <div class="weather-icon-big">${icon}</div>
             </div>
-            <div class="weather-icon">${icon}</div>
+            <div class="weather-details">
+              <div class="weather-detail-item">
+                <span>📍</span> Ormond, VIC
+              </div>
+              <div class="weather-detail-item">
+                <span>💨</span> ${w.windspeed} km/h
+              </div>
+            </div>
           `;
-        })
-        .catch(err => {
-          document.getElementById('weather-widget').innerHTML = `<p class="text-muted" style="padding:1.5rem; text-align:center; width:100%;">Weather unavailable.</p>`;
         });
     }
-
     fetchWeather();
   })();
 </script>
