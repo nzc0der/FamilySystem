@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Announcement Board - Family System{% endblock %}
+{% block title %}Announcement Board - FamilyDashboard{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -100,7 +100,7 @@
     </div>
 
     {% for ann in announcements %}
-    <div class="card ann-card {% if ann.pinned %}pinned{% endif %}">
+    <div class="card ann-card glass-panel {% if ann.pinned %}pinned{% endif %}">
       {% if ann.pinned %}
       <div class="pinned-label">
         <span>📌</span> Pinned
@@ -118,11 +118,18 @@
         <div style="display: flex; align-items: center; gap: 1rem;">
           <span>{{ ann.created_at[:10] }}</span>
           {% if session.role == 'admin' %}
-          <form method="POST" action="{{ url_for('board_delete', ann_id=ann.id) }}" data-confirm="Are you sure you want to delete this announcement?">
-            <button type="submit" class="btn btn-ghost" style="padding: 0.4rem; border-radius: 8px; width: 32px; height: 32px; color: var(--color-danger); border: none;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-          </form>
+          <div style="display: flex; gap: 0.5rem;">
+            <form method="POST" action="{{ url_for('board_pin', ann_id=ann.id) }}">
+              <button type="submit" class="btn btn-ghost" style="padding: 0.4rem; border-radius: 8px; width: 32px; height: 32px; color: var(--color-accent); border: none;" title="Toggle Pin">
+                <span>📌</span>
+              </button>
+            </form>
+            <form method="POST" action="{{ url_for('board_delete', ann_id=ann.id) }}" data-confirm="Are you sure you want to delete this announcement?">
+              <button type="submit" class="btn btn-ghost" style="padding: 0.4rem; border-radius: 8px; width: 32px; height: 32px; color: var(--color-danger); border: none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </form>
+          </div>
           {% endif %}
         </div>
       </div>
@@ -130,7 +137,7 @@
     {% endfor %}
 
     {% if not announcements %}
-    <div class="card" style="text-align: center; padding: 5rem 2rem;">
+    <div class="card glass-panel" style="text-align: center; padding: 5rem 2rem;">
       <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
       <h2 style="font-weight: 800; margin-bottom: 0.5rem;">No announcements</h2>
       <p style="color: var(--color-muted);">Wait for an admin to post something here.</p>
@@ -140,11 +147,11 @@
 
   <div class="sidebar">
     {% if session.role == 'admin' %}
-    <div class="card sidebar-card">
+    <div class="card sidebar-card glass-panel">
       <h3 style="font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
         <span>✍️</span> Post Update
       </h3>
-      <form method="POST" action="{{ url_for('board_add') }}">
+      <form method="POST" action="{{ url_for('board_post') }}">
         <div class="form-group">
           <label>Subject</label>
           <input type="text" name="title" required placeholder="What's happening?">
@@ -161,7 +168,7 @@
       </form>
     </div>
     {% else %}
-    <div class="card sidebar-card" style="background: rgba(167, 139, 250, 0.03); border-style: dashed;">
+    <div class="card sidebar-card glass-panel" style="background: rgba(167, 139, 250, 0.03); border-style: dashed;">
       <p style="font-size: 0.9rem; color: var(--color-muted); line-height: 1.6; text-align: center;">
         Only family admins can post new updates to this board.
       </p>

@@ -396,10 +396,16 @@ def delete_user(user_id: int) -> None:
 
 
 def get_todos(user_id: int) -> list[dict]:
-    """Return all to-do items for a user, ordered newest first."""
+    """Return all to-dos for a user, ordered by done status then date."""
     with _get_db() as conn:
         rows = conn.execute(
-            "SELECT * FROM todos WHERE user_id = ? ORDER BY done ASC, created_at DESC",
+            """
+            SELECT t.*, u.username as author
+            FROM todos t
+            JOIN users u ON u.id = t.user_id
+            WHERE t.user_id = ?
+            ORDER BY t.done ASC, t.created_at DESC
+            """,
             (user_id,),
         ).fetchall()
     return [dict(r) for r in rows]
@@ -447,7 +453,13 @@ def get_notes(user_id: int) -> list[dict]:
     """Return all notes for a user, ordered newest first."""
     with _get_db() as conn:
         rows = conn.execute(
-            "SELECT * FROM notes WHERE user_id = ? ORDER BY updated_at DESC",
+            """
+            SELECT n.*, u.username as author
+            FROM notes n
+            JOIN users u ON u.id = n.user_id
+            WHERE n.user_id = ?
+            ORDER BY n.updated_at DESC
+            """,
             (user_id,),
         ).fetchall()
     return [dict(r) for r in rows]

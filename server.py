@@ -40,6 +40,7 @@ from flask import (
     session,
     url_for,
     jsonify,
+    send_from_directory,
 )
 
 # ---------------------------------------------------------------------------
@@ -144,6 +145,25 @@ def admin_required(f):
 
 
 def _register_routes(app: Flask) -> None:
+
+    @app.before_request
+    def check_ui_mode():
+        # Inject ui_mode into session if not present, but don't force it yet.
+        # The frontend will show a prompt if 'ui_mode_selected' is False.
+        if "ui_mode" not in session:
+            ua = request.user_agent.string.lower()
+            if any(m in ua for m in ["mobile", "android", "iphone", "ipad"]):
+                session["ui_mode"] = "mobile"
+            else:
+                session["ui_mode"] = "pc"
+            session["ui_mode_selected"] = False
+
+    @app.route("/set_ui_mode/<mode>")
+    def set_ui_mode(mode):
+        if mode in ["pc", "mobile"]:
+            session["ui_mode"] = mode
+            session["ui_mode_selected"] = True
+        return redirect(request.referrer or url_for("index"))
 
     # ------------------------------------------------------------------
     # Login / Logout
@@ -268,8 +288,8 @@ def _register_routes(app: Flask) -> None:
         if session.get("role") == "guest":
             flash("Guests cannot save notes.", "warning")
             return redirect(url_for("notes_list"))
-        note_id_raw = request.form.get("note_id") or None
-        note_id = int(note_id_raw) if note_id_raw else None
+        note_id_raw = request.form.get("note_id", "").strip()
+        note_id = int(note_id_raw) if note_id_raw and note_id_raw.isdigit() else None
         title = request.form.get("title", "").strip()
         content = request.form.get("content", "").strip()
         if not title and not content:
@@ -462,15 +482,29 @@ def _register_routes(app: Flask) -> None:
                 fpath = os.path.join(backup_dir, fname)
                 if os.path.isfile(fpath):
                     size_kb = os.path.getsize(fpath) // 1024
-                    backups.append({"name": fname, "size_kb": size_kb})
+                    # Extract date from filename if it follows backup_YYYYMMDD_HHMMSS.db pattern
+                    dt_str = "Unknown"
+                    if "_" in fname:
+                        parts = fname.split("_")
+                        if len(parts) >= 2:
+                            dt_raw = parts[1].split(".")[0]
+                            # Simple formatting
+                            if len(dt_raw) >= 8:
+                                dt_str = f"{dt_raw[:4]}-{dt_raw[4:6]}-{dt_raw[6:8]}"
+                    
+                    backups.append({
+                        "filename": fname, 
+                        "size": f"{size_kb} KB",
+                        "date": dt_str
+                    })
         users = settings.get_users()
         cfg = settings.load_config()
-        return render_template("admin.html", backups=backups[:20], config=cfg, users=users)
+        return render_template("admin.html", backups=backups[:20], config=cfg, all_users=users)
 
     @app.route("/admin/users/add", methods=["POST"])
     @login_required
     @admin_required
-    def admin_user_add():
+    def admin_add_user():
         username = request.form.get("username", "").strip().lower()
         password = request.form.get("password", "")
         role = request.form.get("role", "user")
@@ -499,6 +533,38 @@ def _register_routes(app: Flask) -> None:
             flash(f"Update failed: {result['message']}", "danger")
         return redirect(url_for("admin_panel"))
 
+    @app.route("/admin/backup/create", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_backup_create():
+        try:
+            db_path = _backup_database()
+            _backup_config()
+            flash(f"Backup created: {os.path.basename(db_path)}", "success")
+        except Exception as e:
+            flash(f"Backup failed: {e}", "danger")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/backup/delete/<filename>", methods=["POST"])
+    @login_required
+    @admin_required
+    def admin_backup_delete(filename: str):
+        backup_dir = settings._backup_dir()
+        fpath = os.path.join(backup_dir, filename)
+        if os.path.isfile(fpath):
+            os.remove(fpath)
+            flash(f"Backup '{filename}' deleted.", "success")
+        else:
+            flash("Backup file not found.", "danger")
+        return redirect(url_for("admin_panel"))
+
+    @app.route("/admin/backups/download/<filename>")
+    @login_required
+    @admin_required
+    def admin_backup_download(filename: str):
+        backup_dir = settings._backup_dir()
+        return send_from_directory(backup_dir, filename, as_attachment=True)
+
     @app.route("/admin/restore", methods=["POST"])
     @login_required
     @admin_required
@@ -514,62 +580,45 @@ def _register_routes(app: Flask) -> None:
         try:
             _restore_database(backup_path)
             flash(f"Database restored from '{backup_name}'.", "success")
-            logger.info("Manual restore from '%s' by user '%s'.", backup_name, session["username"])
         except Exception as exc:
             flash(f"Restore failed: {exc}", "danger")
         return redirect(url_for("admin_panel"))
 
-    @app.route("/admin/users/rename", methods=["POST"])
+    @app.route("/admin/reset", methods=["POST"])
     @login_required
     @admin_required
-    def admin_user_rename():
-        user_id = int(request.form.get("user_id"))
-        new_username = request.form.get("new_username", "").strip()
-        if not new_username:
-            flash("Username cannot be empty.", "warning")
-            return redirect(url_for("admin_panel"))
-        try:
-            settings.rename_user(user_id, new_username)
-            flash(f"User renamed to {new_username}.", "success")
-        except ValueError as e:
-            flash(str(e), "danger")
-        return redirect(url_for("admin_panel"))
+    def admin_reset():
+        """CRITICAL: Reset the system by deleting config.json."""
+        settings.reset_config()
+        session.clear()
+        return redirect(url_for("dashboard"))
 
     @app.route("/admin/users/password", methods=["POST"])
     @login_required
     @admin_required
-    def admin_user_password():
-        user_id = int(request.form.get("user_id"))
+    def admin_reset_password():
+        username = request.form.get("username")
         new_password = request.form.get("new_password", "")
-        if len(new_password) < 6:
-            flash("Password must be at least 6 characters.", "warning")
+        if not username or len(new_password) < 6:
+            flash("Invalid input or password too short.", "warning")
             return redirect(url_for("admin_panel"))
-        settings.change_password(user_id, new_password)
-        flash("User password updated.", "success")
+        
+        user = settings.get_user_by_username(username)
+        if user:
+            settings.change_password(user["id"], new_password)
+            flash(f"Password updated for {username}.", "success")
+        else:
+            flash("User not found.", "danger")
         return redirect(url_for("admin_panel"))
 
-    @app.route("/admin/users/delete", methods=["POST"])
+    @app.route("/admin/users/delete/<int:user_id>", methods=["POST"])
     @login_required
     @admin_required
-    def admin_user_delete():
-        user_id = int(request.form.get("user_id"))
+    def admin_delete_user(user_id: int):
         try:
             settings.delete_user(user_id)
             flash("User deleted.", "success")
         except ValueError as e:
-            flash(str(e), "danger")
-        return redirect(url_for("admin_panel"))
-
-    @app.route("/admin/users/shopping", methods=["POST"])
-    @login_required
-    @admin_required
-    def admin_user_shopping():
-        user_id = int(request.form.get("user_id"))
-        permission = request.form.get("permission")
-        try:
-            settings.set_shopping_permission(user_id, permission)
-            flash("Shopping permission updated.", "success")
-        except Exception as e:
             flash(str(e), "danger")
         return redirect(url_for("admin_panel"))
 

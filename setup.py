@@ -221,12 +221,30 @@ def run_setup() -> None:
             break
 
         password = _prompt_password(username)
-        role = "admin" if i == 1 else "user"
+        
+        # Ask for Role
+        is_admin = _prompt(f"  Should '{username}' be a System Admin? [y/N]: ").lower() in ("y", "yes")
+        role = "admin" if is_admin else "user"
+        
+        # Ask for Shopping Permissions if not admin (admins get 'full' by default)
+        shopping_permission = "full"
+        if role == "user":
+            print("  Shopping List Permissions:")
+            print("    1. Read and Add (Cannot delete others' items)")
+            print("    2. Full Access (Can add and delete)")
+            print("    3. Read Only")
+            perm_choice = _prompt_int("  Select permission [1-3]: ", 1, 3)
+            if perm_choice == 1:
+                shopping_permission = "add"
+            elif perm_choice == 2:
+                shopping_permission = "full"
+            else:
+                shopping_permission = "read"
 
         try:
-            settings.add_user(username, password, role=role)
+            settings.add_user(username, password, role=role, shopping_permission=shopping_permission)
             created_users.append(username)
-            label = " (admin)" if role == "admin" else ""
+            label = f" ({role}, shopping:{shopping_permission})"
             print(f"  [+] User '{username}'{label} created.")
         except Exception as exc:
             logger.error("Failed to create user '%s': %s", username, exc)

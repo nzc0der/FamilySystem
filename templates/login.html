@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Family System</title>
+  <title>Login - FamilyDashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
@@ -189,20 +189,25 @@
           <div class="profile-name">{{ u.username|capitalize }}</div>
         </div>
         {% endfor %}
+        <!-- Guest Option -->
+        <div class="profile-item" onclick="selectUser('guest', this)">
+          <div class="profile-avatar" style="background: rgba(255,255,255,0.03); border: 2px dashed var(--color-border);">👤</div>
+          <div class="profile-name">Guest</div>
+        </div>
       </div>
 
       <input type="hidden" name="username" id="selected-username" required>
       
-      <div class="form-group" id="password-group" style="display: none;">
-        <label>Password</label>
-        <input type="password" name="password" id="password-input" placeholder="••••••••" required>
+      <div class="form-group" id="password-group" style="display: none; margin-top: 1rem; animation: slideUp 0.4s ease;">
+        <label id="password-label">Password</label>
+        <input type="password" name="password" id="password-input" placeholder="••••••••">
       </div>
 
       <button type="submit" class="btn" id="login-btn" style="display: none;">Access Dashboard</button>
     </form>
     
     <div style="margin-top: 2rem; font-size: 0.8rem; color: var(--color-muted); font-weight: 600;">
-      Family System v2.0 • Secured for Raspberry Pi
+      FamilyDashboard v2.0 • Secured for Raspberry Pi
     </div>
   </div>
 
@@ -214,10 +219,22 @@
       document.querySelectorAll('.profile-item').forEach(item => item.classList.remove('selected'));
       el.classList.add('selected');
       
-      // Show password field
-      document.getElementById('password-group').style.display = 'block';
-      document.getElementById('login-btn').style.display = 'block';
-      document.getElementById('password-input').focus();
+      const pwdGroup = document.getElementById('password-group');
+      const pwdInput = document.getElementById('password-input');
+      const loginBtn = document.getElementById('login-btn');
+      
+      if (username === 'guest') {
+        pwdGroup.style.display = 'none';
+        pwdInput.required = false;
+        loginBtn.style.display = 'block';
+        loginBtn.textContent = 'Enter as Guest';
+      } else {
+        pwdGroup.style.display = 'block';
+        pwdInput.required = true;
+        loginBtn.style.display = 'block';
+        loginBtn.textContent = 'Access Dashboard';
+        pwdInput.focus();
+      }
     }
   </script>
 </body>

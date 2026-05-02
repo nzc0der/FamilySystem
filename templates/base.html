@@ -1,60 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}Family Dashboard{% endblock %}</title>
   <meta name="description" content="Private family dashboard - to-dos, notes, and announcements." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
   <style>
     /* ---------------------------------------------------------------
        Design tokens
     --------------------------------------------------------------- */
     :root {
-      --color-bg:         #050507;
-      --color-surface:    rgba(15, 15, 20, 0.75);
-      --color-surface-2:  rgba(30, 30, 35, 0.9);
-      --color-border:     rgba(255, 255, 255, 0.06);
-      --color-primary:    #a78bfa;
-      --color-primary-dk: #7c3aed;
-      --color-accent:     #f472b6;
-      --color-success:    #34d399;
-      --color-warning:    #fbbf24;
-      --color-danger:     #f87171;
-      --color-info:       #60a5fa;
-      --color-text:       #f9fafb;
-      --color-muted:      #9ca3af;
-      --radius-sm:        12px;
-      --radius:           18px;
-      --radius-lg:        32px;
-      --shadow:           0 25px 50px -12px rgba(0, 0, 0, 0.6);
-      --transition:       0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --color-bg: #050508;
+      --color-surface: rgba(17, 17, 24, 0.7);
+      --color-surface-2: rgba(30, 30, 38, 0.85);
+      --color-border: rgba(255, 255, 255, 0.08);
+      --color-primary: #a78bfa;
+      --color-primary-dk: #8b5cf6;
+      --color-accent: #f472b6;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --color-info: #3b82f6;
+      --color-text: #fcfcfd;
+      --color-muted: #94a3b8;
+      --radius-sm: 14px;
+      --radius: 20px;
+      --radius-lg: 36px;
+      --shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* ---------------------------------------------------------------
        Reset & base
     --------------------------------------------------------------- */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Outfit', -apple-system, sans-serif;
       background: var(--color-bg);
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(167, 139, 250, 0.08), transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(244, 114, 182, 0.08), transparent 40%);
+      background-image:
+        radial-gradient(circle at 0% 0%, rgba(167, 139, 250, 0.12), transparent 45%),
+        radial-gradient(circle at 100% 100%, rgba(244, 114, 182, 0.12), transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.05), transparent 60%);
       background-attachment: fixed;
       color: var(--color-text);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
-    a { color: var(--color-primary); text-decoration: none; transition: all var(--transition); }
-    a:hover { color: var(--color-accent); }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+
+    a:hover {
+      color: var(--color-accent);
+    }
 
     /* ---------------------------------------------------------------
        Navigation
@@ -231,6 +255,7 @@
       transform: translateX(100%);
       transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+      overflow-y: auto;
     }
 
     .mobile-nav-container.active .mobile-nav-content {
@@ -326,7 +351,9 @@
     }
 
     /* Inputs */
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid var(--color-border);
       border-radius: 14px;
@@ -337,7 +364,9 @@
       transition: all var(--transition);
     }
 
-    input:focus, select:focus, textarea:focus {
+    input:focus,
+    select:focus,
+    textarea:focus {
       outline: none;
       border-color: var(--color-primary);
       background: rgba(255, 255, 255, 0.08);
@@ -348,79 +377,307 @@
        Responsive
     --------------------------------------------------------------- */
     @media (max-width: 992px) {
-      .nav-links { display: none; }
-      .hamburger { display: flex; }
-      .desktop-only { display: none; }
+      .nav-links {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .desktop-only {
+        display: none;
+      }
     }
 
     @media (max-width: 640px) {
-      .page-wrapper { padding: 1.5rem 1rem; }
-      .nav-brand span:not(.brand-icon) { display: none; }
-      .nav-user span { display: none; }
-      .nav-user { padding-right: 0.4rem; }
+      .page-wrapper {
+        padding: 1.5rem 1rem;
+      }
+
+      .nav-brand span:not(.brand-icon) {
+        display: none;
+      }
+
+      .nav-user span {
+        display: none;
+      }
+
+      .nav-user {
+        padding-right: 0.4rem;
+      }
     }
 
     /* Grid System */
-    .grid { display: grid; gap: 1.5rem; }
-    .grid-2 { grid-template-columns: repeat(2, 1fr); }
-    .grid-3 { grid-template-columns: repeat(3, 1fr); }
-    
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
     @media (max-width: 1024px) {
-      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
-    
+
     @media (max-width: 768px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+
+      .grid-2,
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
     }
-    
+
     /* Dropdown content */
-    .dropdown { position: relative; display: inline-block; }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
     .dropdown-content {
-      display: none; position: absolute; right: 0; top: 100%;
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
       background-color: var(--color-surface);
-      min-width: 180px; box-shadow: var(--shadow);
-      z-index: 200; border: 1px solid var(--color-border);
-      border-radius: var(--radius); padding: 0.5rem 0;
+      min-width: 180px;
+      box-shadow: var(--shadow);
+      z-index: 200;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 0.5rem 0;
       backdrop-filter: blur(20px);
     }
+
     .dropdown-content a {
-      color: var(--color-text); padding: 0.75rem 1.25rem;
-      text-decoration: none; display: block; font-size: 0.9rem;
+      color: var(--color-text);
+      padding: 0.75rem 1.25rem;
+      text-decoration: none;
+      display: block;
+      font-size: 0.9rem;
       font-weight: 500;
     }
-    .dropdown-content a:hover { background-color: rgba(255,255,255,0.05); }
+
+    .dropdown-content a:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
 
     .base-modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 3000; animation: fadeOverlay 0.2s ease;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3000;
+      animation: fadeOverlay 0.2s ease;
       backdrop-filter: blur(8px);
     }
-    .base-modal-overlay.hidden { display: none; }
-    .base-modal-box {
-      background: #0f0f14; border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg); padding: 2.5rem;
-      width: 90%; max-width: 440px; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .base-modal-overlay.hidden {
+      display: none;
     }
-    @keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-    .base-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-    .base-modal-header h2 { font-size: 1.25rem; font-weight: 800; }
-    .base-modal-close { background: none; border: none; color: var(--color-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; }
-    .base-modal-close:hover { color: var(--color-text); }
+
+    .base-modal-box {
+      background: #0f0f14;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 440px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes fadeOverlay {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .base-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+
+    .base-modal-header h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .base-modal-close {
+      background: none;
+      border: none;
+      color: var(--color-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .base-modal-close:hover {
+      color: var(--color-text);
+    }
+
+    /* ---------------------------------------------------------------
+       UI Mode Specifics
+    --------------------------------------------------------------- */
+    body.ui-mode-mobile .desktop-only {
+      display: none !important;
+    }
+
+    body.ui-mode-pc .mobile-only {
+      display: none !important;
+    }
+
+    /* PC Mode Enhancements */
+    body.ui-mode-pc .page-wrapper {
+      padding: 3rem 2rem;
+      max-width: 1400px;
+    }
+
+    /* Mobile Mode Enhancements */
+    body.ui-mode-mobile .page-wrapper {
+      padding: 1.25rem 1rem;
+    }
+
+    body.ui-mode-mobile .card {
+      padding: 1.25rem;
+      border-radius: var(--radius);
+    }
+
+    /* Selection Modal Specifics */
+    .mode-selection-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .mode-option {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-decoration: none;
+      color: var(--color-text);
+    }
+
+    .mode-option:hover {
+      background: rgba(167, 139, 250, 0.1);
+      border-color: var(--color-primary);
+      transform: translateY(-5px);
+    }
+
+    .mode-option i {
+      font-size: 2.5rem;
+    }
+
+    .mode-option span {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Extra Polish */
+    .glass-panel {
+      background: var(--color-surface);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .flash-list {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .flash {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .flash-success {
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--color-success);
+      border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .flash-warning {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--color-warning);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+
+    .flash-danger {
+      background: rgba(248, 113, 113, 0.15);
+      color: var(--color-danger);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
-<body data-role="{{ session.role }}">
+
+<body data-role="{{ session.role }}"
+  class="ui-mode-{{ session.ui_mode }} {% if not session.ui_mode_selected %}show-mode-selector{% endif %}">
   {% if session.username %}
   <nav>
     <div class="nav-left">
       <a href="{{ url_for('dashboard') }}" class="nav-brand">
         <div class="brand-icon">🏠</div>
-        <span>Family System</span>
+        <span>FamilyDashboard</span>
       </a>
-      
+
       <ul class="nav-links">
         <li>
           <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
@@ -463,6 +720,10 @@
           {% if session.role == 'admin' %}
           <a href="{{ url_for('admin_panel') }}">Admin Panel</a>
           {% endif %}
+          <div style="border-top: 1px solid var(--color-border); margin: 0.5rem 0;"></div>
+          <a href="{{ url_for('set_ui_mode', mode='pc' if session.ui_mode == 'mobile' else 'mobile') }}">
+            Switch to {{ 'PC' if session.ui_mode == 'mobile' else 'Mobile' }} UI
+          </a>
           <a href="{{ url_for('logout') }}" style="color: var(--color-danger);">Log out</a>
         </div>
       </div>
@@ -482,12 +743,14 @@
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div class="nav-brand">
           <div class="brand-icon">🏠</div>
-          <span>Family System</span>
+          <span>FamilyDashboard</span>
         </div>
-        <button class="btn btn-ghost" id="mobile-close" style="padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem;">&times;</button>
+        <button class="btn btn-ghost" id="mobile-close"
+          style="padding: 0.5rem; border-radius: 50%; width: 40px; height: 40px; font-size: 1.5rem;">&times;</button>
       </div>
 
-      <div class="mobile-user-card" style="padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: var(--radius); border: 1px solid var(--color-border); display: flex; align-items: center; gap: 1rem; margin: 1rem 0;">
+      <div class="mobile-user-card"
+        style="padding: 1.25rem; background: rgba(255,255,255,0.03); border-radius: var(--radius); border: 1px solid var(--color-border); display: flex; align-items: center; gap: 1rem; margin: 1rem 0;">
         <div class="avatar" style="width: 48px; height: 48px; font-size: 1.2rem;">{{ session.username[0]|upper }}</div>
         <div>
           <div style="font-weight: 800; font-size: 1.1rem;">{{ session.username|capitalize }}</div>
@@ -496,32 +759,71 @@
       </div>
 
       <ul class="mobile-nav-links">
-        <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}"><span>📊</span> Dashboard</a></li>
-        <li><a href="{{ url_for('shopping') }}" class="{% if request.endpoint == 'shopping' %}active{% endif %}"><span>🛒</span> Shopping</a></li>
-        <li><a href="{{ url_for('calendar') }}" class="{% if request.endpoint == 'calendar' %}active{% endif %}"><span>📅</span> Calendar</a></li>
-        <li><a href="{{ url_for('notes_list') }}" class="{% if request.endpoint == 'notes_list' %}active{% endif %}"><span>📝</span> Notes</a></li>
-        <li><a href="{{ url_for('board') }}" class="{% if request.endpoint == 'board' %}active{% endif %}"><span>📢</span> Board</a></li>
+        <li><a href="{{ url_for('dashboard') }}"
+            class="{% if request.endpoint == 'dashboard' %}active{% endif %}"><span>📊</span> Dashboard</a></li>
+        <li><a href="{{ url_for('shopping') }}"
+            class="{% if request.endpoint == 'shopping' %}active{% endif %}"><span>🛒</span> Shopping</a></li>
+        <li><a href="{{ url_for('calendar') }}"
+            class="{% if request.endpoint == 'calendar' %}active{% endif %}"><span>📅</span> Calendar</a></li>
+        <li><a href="{{ url_for('notes_list') }}"
+            class="{% if request.endpoint == 'notes_list' %}active{% endif %}"><span>📝</span> Notes</a></li>
+        <li><a href="{{ url_for('board') }}"
+            class="{% if request.endpoint == 'board' %}active{% endif %}"><span>📢</span> Board</a></li>
         {% if session.role == 'admin' %}
-        <li><a href="{{ url_for('admin_panel') }}" class="{% if request.endpoint == 'admin_panel' %}active{% endif %}"><span>⚙️</span> Admin</a></li>
+        <li><a href="{{ url_for('admin_panel') }}"
+            class="{% if request.endpoint == 'admin_panel' %}active{% endif %}"><span>⚙️</span> Admin</a></li>
         {% endif %}
       </ul>
 
       <div style="margin-top: auto;">
-        <a href="{{ url_for('logout') }}" class="btn btn-ghost" style="width: 100%; color: var(--color-danger); border-color: rgba(248, 113, 113, 0.2);">Log out</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-ghost"
+          style="width: 100%; color: var(--color-danger); border-color: rgba(248, 113, 113, 0.2);">Log out</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI Selection Modal -->
+  {% if not session.ui_mode_selected %}
+  <div id="ui-mode-modal" class="base-modal-overlay">
+    <div class="base-modal-box" style="max-width: 500px;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+        <h2 style="font-size: 1.75rem;">Welcome to FamilyDashboard</h2>
+        <p style="color: var(--color-muted); margin-top: 0.5rem;">We've detected a new device. Which UI would you
+          prefer?</p>
+      </div>
+
+      <div class="mode-selection-grid">
+        <a href="{{ url_for('set_ui_mode', mode='pc') }}" class="mode-option">
+          <i>💻</i>
+          <span>Desktop (PC)</span>
+          <small style="color: var(--color-muted); font-size: 0.8rem;">Full feature layout</small>
+        </a>
+        <a href="{{ url_for('set_ui_mode', mode='mobile') }}" class="mode-option">
+          <i>📱</i>
+          <span>Mobile App</span>
+          <small style="color: var(--color-muted); font-size: 0.8rem;">Optimized for touch</small>
+        </a>
+      </div>
+
+      <div style="margin-top: 2rem; text-align: center;">
+        <p style="font-size: 0.8rem; color: var(--color-muted);">You can always change this in your profile settings
+          later.</p>
       </div>
     </div>
   </div>
   {% endif %}
+  {% endif %}
 
   <div class="page-wrapper">
     {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        <ul class="flash-list">
-          {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
+    {% if messages %}
+    <ul class="flash-list">
+      {% for category, message in messages %}
+      <li class="flash flash-{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
     {% endwith %}
 
     {% block content %}{% endblock %}
@@ -533,7 +835,8 @@
     <div class="base-modal-box">
       <div class="base-modal-header">
         <h2>Change Password</h2>
-        <button class="base-modal-close" onclick="document.getElementById('password-modal').classList.add('hidden')" aria-label="Close">&times;</button>
+        <button class="base-modal-close" onclick="document.getElementById('password-modal').classList.add('hidden')"
+          aria-label="Close">&times;</button>
       </div>
       <form method="POST" action="{{ url_for('change_password') }}">
         <div class="form-group">
@@ -545,7 +848,8 @@
           <input type="password" id="confirm_password" name="confirm_password" required minlength="6" />
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
-          <button type="button" class="btn btn-ghost" onclick="document.getElementById('password-modal').classList.add('hidden')">Cancel</button>
+          <button type="button" class="btn btn-ghost"
+            onclick="document.getElementById('password-modal').classList.add('hidden')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Password</button>
         </div>
       </form>
@@ -557,7 +861,8 @@
   <div id="global-confirm-modal" class="base-modal-overlay hidden">
     <div class="base-modal-box" style="max-width: 400px; text-align: center;">
       <h2 id="global-confirm-title" style="margin-bottom: 1rem; font-size: 1.25rem;">Confirm Action</h2>
-      <p id="global-confirm-msg" class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.95rem; white-space: pre-wrap;"></p>
+      <p id="global-confirm-msg" class="text-muted"
+        style="margin-bottom: 1.5rem; font-size: 0.95rem; white-space: pre-wrap;"></p>
       <div style="display: flex; justify-content: center; gap: 1rem;">
         <button id="global-confirm-cancel" class="btn btn-ghost">Cancel</button>
         <button id="global-confirm-ok" class="btn btn-danger">Confirm</button>
@@ -570,6 +875,8 @@
     <span id="local-time"></span>
   </footer>
 
+  <!-- Modern Icons & Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
     // Toggle Mobile Nav
@@ -594,7 +901,7 @@
       content.style.display = isVisible ? 'none' : 'block';
     }
 
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       if (!event.target.closest('#user-dropdown')) {
         const content = document.getElementById('user-dropdown-content');
         if (content) content.style.display = 'none';
@@ -602,15 +909,15 @@
     }
 
     // Global Confirm Function
-    window.customConfirm = function(message, onConfirm, isAlert = false) {
+    window.customConfirm = function (message, onConfirm, isAlert = false) {
       const modal = document.getElementById('global-confirm-modal');
       const msgEl = document.getElementById('global-confirm-msg');
       const cancelBtn = document.getElementById('global-confirm-cancel');
       const okBtn = document.getElementById('global-confirm-ok');
-      
+
       msgEl.textContent = message;
       modal.classList.remove('hidden');
-      
+
       if (isAlert) {
         cancelBtn.style.display = 'none';
         okBtn.textContent = 'OK';
@@ -622,21 +929,21 @@
       }
 
       const close = () => { modal.classList.add('hidden'); cleanup(); };
-      
-      const onOk = () => { close(); if(onConfirm) onConfirm(); };
+
+      const onOk = () => { close(); if (onConfirm) onConfirm(); };
       const onCancel = () => { close(); };
-      
+
       const cleanup = () => {
         okBtn.removeEventListener('click', onOk);
         cancelBtn.removeEventListener('click', onCancel);
       };
-      
+
       okBtn.addEventListener('click', onOk);
       cancelBtn.addEventListener('click', onCancel);
     };
 
     // Form confirmation
-    document.addEventListener('submit', function(e) {
+    document.addEventListener('submit', function (e) {
       if (e.target.hasAttribute('data-confirm')) {
         e.preventDefault();
         window.customConfirm(e.target.getAttribute('data-confirm'), () => {
@@ -646,7 +953,7 @@
       }
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       const trigger = e.target.closest('[data-confirm-click]');
       if (trigger) {
         e.preventDefault();
@@ -675,4 +982,5 @@
   </script>
   {% block extra_scripts %}{% endblock %}
 </body>
+
 </html>

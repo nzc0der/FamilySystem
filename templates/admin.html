@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}System Admin - Family System{% endblock %}
+{% block title %}System Admin - FamilyDashboard{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -137,6 +137,10 @@
           </div>
           <div style="display: flex; gap: 0.5rem;">
             <a href="/admin/backups/download/{{ b.filename }}" class="btn btn-ghost btn-sm">Download</a>
+            <form method="POST" action="{{ url_for('admin_restore') }}" data-confirm="CRITICAL: Overwrite live data with this backup?">
+              <input type="hidden" name="backup_name" value="{{ b.filename }}">
+              <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--color-accent); border: none;">Restore</button>
+            </form>
             <form method="POST" action="{{ url_for('admin_backup_delete', filename=b.filename) }}" data-confirm="Permanently delete this backup file?">
               <button type="submit" class="btn btn-ghost btn-sm" style="color: var(--color-danger); border: none;">Delete</button>
             </form>
@@ -195,7 +199,14 @@
         <select name="role">
           <option value="user">Family Member</option>
           <option value="admin">System Admin</option>
-          <option value="guest">Guest (Read-only)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Shopping Permission</label>
+        <select name="shopping_permission">
+          <option value="full">Full Access (Add & Delete)</option>
+          <option value="add">Add Only (Cannot delete others)</option>
+          <option value="read">Read Only</option>
         </select>
       </div>
       <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Account</button>
