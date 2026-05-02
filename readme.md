@@ -1,6 +1,6 @@
 # Family Dashboard
 
-![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-green)
+![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-pink)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 ![Status](https://img.shields.io/badge/status-active-success)
