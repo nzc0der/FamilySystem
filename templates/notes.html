@@ -151,7 +151,7 @@
        onclick="viewNote(JSON.parse(this.dataset.note))">
     <div class="note-header">
       <div class="note-title">{{ note.title }}</div>
-      {% if session.role != 'guest' %}
+      {% if session.user_id == note.user_id or session.role == 'admin' %}
       <div style="display: flex; gap: 0.5rem;">
         <button class="btn btn-ghost" 
                 style="padding: 0.4rem; border-radius: 8px; width: 32px; height: 32px;" 

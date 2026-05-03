@@ -236,7 +236,7 @@ def _register_routes(app: Flask) -> None:
     def dashboard():
         user_id = session["user_id"]
         todos = settings.get_todos(user_id)
-        notes = settings.get_notes(user_id)
+        notes = settings.get_notes()
         announcements = settings.get_announcements()[:3]  # Preview top 3.
         bookmarks = settings.get_bookmarks()
         events = settings.get_events()
@@ -279,7 +279,7 @@ def _register_routes(app: Flask) -> None:
     @app.route("/notes")
     @login_required
     def notes_list():
-        notes = settings.get_notes(session["user_id"])
+        notes = settings.get_notes()
         return render_template("notes.html", notes=notes)
 
     @app.route("/notes/save", methods=["POST"])
@@ -301,7 +301,7 @@ def _register_routes(app: Flask) -> None:
     @app.route("/notes/delete/<int:note_id>", methods=["POST"])
     @login_required
     def note_delete(note_id: int):
-        settings.delete_note(note_id, session["user_id"])
+        settings.delete_note(note_id, session["user_id"], is_admin=(session.get("role") == "admin"))
         return redirect(url_for("notes_list"))
 
     # ------------------------------------------------------------------

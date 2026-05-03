@@ -668,7 +668,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 
-<body data-role="{{ session.role }}"
+<body data-role="{{ session.role }}" data-user-id="{{ session.user_id }}"
   class="ui-mode-{{ session.ui_mode }} {% if not session.ui_mode_selected %}show-mode-selector{% endif %}">
   {% if session.username %}
   <nav>

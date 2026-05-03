@@ -449,18 +449,16 @@ def delete_todo(todo_id: int, user_id: int) -> None:
 # ---------------------------------------------------------------------------
 
 
-def get_notes(user_id: int) -> list[dict]:
-    """Return all notes for a user, ordered newest first."""
+def get_notes() -> list[dict]:
+    """Return all notes for the family, ordered newest first."""
     with _get_db() as conn:
         rows = conn.execute(
             """
             SELECT n.*, u.username as author
             FROM notes n
             JOIN users u ON u.id = n.user_id
-            WHERE n.user_id = ?
             ORDER BY n.updated_at DESC
-            """,
-            (user_id,),
+            """
         ).fetchall()
     return [dict(r) for r in rows]
 
@@ -490,13 +488,16 @@ def upsert_note(user_id: int, note_id: Optional[int], title: str, content: str) 
             return note_id
 
 
-def delete_note(note_id: int, user_id: int) -> None:
-    """Delete a note owned by user_id."""
+def delete_note(note_id: int, user_id: int, is_admin: bool = False) -> None:
+    """Delete a note owned by user_id or any if admin."""
     with _get_db() as conn:
-        conn.execute(
-            "DELETE FROM notes WHERE id = ? AND user_id = ?",
-            (note_id, user_id),
-        )
+        if is_admin:
+            conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
+        else:
+            conn.execute(
+                "DELETE FROM notes WHERE id = ? AND user_id = ?",
+                (note_id, user_id),
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -647,7 +648,7 @@ def get_shopping_items() -> list[dict]:
     with _get_db() as conn:
         rows = conn.execute(
             """
-            SELECT s.id, s.item_name, s.created_at, u.username as added_by_name
+            SELECT s.id, s.item_name as content, s.created_at, u.username as author
             FROM shopping_items s
             LEFT JOIN users u ON u.id = s.added_by
             ORDER BY s.created_at DESC
