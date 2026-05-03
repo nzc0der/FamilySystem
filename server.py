@@ -237,6 +237,8 @@ def _register_routes(app: Flask) -> None:
         user_id = session["user_id"]
         todos = settings.get_todos(user_id)
         notes = settings.get_notes()
+        announcements = settings.get_announcements()[:3]
+        bookmarks = settings.get_bookmarks()
         events = settings.get_events()
         all_users = settings.get_users()
         return render_template(
