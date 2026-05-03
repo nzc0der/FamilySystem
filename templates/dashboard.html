@@ -1,595 +1,258 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - FamilyDashboard{% endblock %}
+{% block title %}Dashboard - Family{% endblock %}
 
 {% block extra_head %}
 <style>
-  .greeting-container {
-    margin-bottom: 3rem;
-    position: relative;
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+      "greet greet greet weather"
+      "tasks tasks feed feed"
+      "tasks tasks calendar links";
+    gap: 1.5rem;
+    margin-top: 1rem;
   }
 
-  .greeting {
-    font-size: 3.5rem;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #fff 30%, var(--color-primary) 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: inline-block;
-  }
-
-  .date-display {
-    font-size: 1.1rem;
-    color: var(--color-muted);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .date-display::before {
-    content: '';
-    width: 20px;
-    height: 3px;
-    background: var(--color-primary);
-    border-radius: 10px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.5rem;
-  }
-
-  .section-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .todo-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    margin-bottom: 0.75rem;
-    transition: all var(--transition);
-  }
-
-  .todo-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
-  }
-
-  .todo-item.done {
-    opacity: 0.5;
-  }
-
-  .todo-item.done .todo-text {
-    text-decoration: line-through;
-    color: var(--color-muted);
-  }
-
-  .todo-check {
-    width: 24px;
-    height: 24px;
-    border-radius: 8px;
-    border: 2px solid var(--color-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: none;
-    color: #fff;
-    transition: all var(--transition);
-  }
-
-  .todo-item.done .todo-check {
-    background: var(--color-success);
-    border-color: var(--color-success);
-  }
-
-  .weather-card {
-    background: linear-gradient(135deg, #1e1e2d 0%, #111119 100%);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+  .bento-card {
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
-  .weather-card::before {
-    content: '';
-    position: absolute;
-    top: -20%;
-    right: -10%;
-    width: 150px;
-    height: 150px;
-    background: var(--color-primary);
-    filter: blur(80px);
-    opacity: 0.15;
-  }
+  /* Area assignments */
+  .area-greet { grid-area: greet; }
+  .area-weather { grid-area: weather; }
+  .area-tasks { grid-area: tasks; }
+  .area-feed { grid-area: feed; }
+  .area-calendar { grid-area: calendar; }
+  .area-links { grid-area: links; }
 
-  .weather-main {
+  /* Greet Card Special */
+  .greet-card {
+    background: transparent;
+    border: none;
+    padding: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
   }
 
-  .weather-temp-big {
-    font-size: 3.5rem;
+  .greeting-text {
+    font-size: 2.5rem;
     font-weight: 800;
-    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--color-text);
   }
 
-  .weather-icon-big {
-    font-size: 4rem;
-    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
-  }
-
-  .weather-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    border-top: 1px solid var(--color-border);
-    padding-top: 1.25rem;
-  }
-
-  .quick-links {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 1rem;
-  }
-
-  .link-item {
-    display: flex;
-    flex-direction: column;
+  /* Weather Card Special */
+  .weather-card-bento {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
     text-align: center;
-    padding: 1rem 0.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: var(--radius-sm);
+  }
+
+  /* Items */
+  .task-item {
+    background: rgba(255,255,255,0.03);
     border: 1px solid var(--color-border);
-    transition: all var(--transition);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+  }
+  .task-item:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
   }
 
-  .link-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--color-primary);
-    transform: translateY(-4px);
+  .feed-item {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
   }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-item:hover { background: rgba(255,255,255,0.02); }
 
-  .link-icon {
-    font-size: 1.5rem;
-  }
-
-  .link-label {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--color-muted);
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
+  @media (max-width: 1100px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas: 
+        "greet greet"
+        "weather links"
+        "tasks tasks"
+        "feed calendar";
     }
-  }
-
-  .ann-item.is-pinned {
-    border-left: 4px solid var(--color-accent);
-    background: rgba(244, 114, 182, 0.03);
   }
 
   @media (max-width: 768px) {
-    .greeting {
-      font-size: 2.5rem;
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      grid-template-areas: 
+        "greet"
+        "weather"
+        "tasks"
+        "feed"
+        "calendar"
+        "links";
     }
-
-    .greeting-container {
-      margin-bottom: 2rem;
-    }
+    .greeting-text { font-size: 2rem; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="greeting-container">
-  <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+<div class="dashboard-grid">
+  
+  <!-- Greeting -->
+  <div class="bento-card area-greet greet-card">
     <div>
-      <h1 class="greeting" id="greeting-text" style="animation: slideDown 0.4s ease-out; font-weight: 700;">Hello, {{ session.username }}.</h1>
-      <div class="date-display" id="date-display" style="animation: fadeIn 0.6s ease-out;"></div>
+      <h1 class="greeting-text">Hello, {{ session.username }}.</h1>
+      <p id="date-display" style="color: var(--color-muted); font-weight: 600; margin-top: 0.5rem;"></p>
     </div>
-
-    <!-- Yearly Progress -->
-    <div class="year-card glass-panel"
-      style="padding: 1rem 1.5rem; min-width: 240px; transform: translateY(0); transition: transform 0.3s ease; cursor: pointer;"
-      onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-      <div
-        style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
-        <span>Year Progress</span>
+    <!-- Year Progress -->
+    <div class="card" style="padding: 1rem 1.5rem; min-width: 200px;">
+      <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
+        <span>Year</span>
         <span id="year-pct">0%</span>
       </div>
-      <div
-        style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">
-        <div id="year-bar"
-          style="height: 100%; background: linear-gradient(90deg, var(--color-accent), var(--color-primary), var(--color-info)); background-size: 200% 200%; animation: gradientMove 3s ease infinite; width: 0%; transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
-        </div>
+      <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+        <div id="year-bar" style="height: 100%; background: var(--color-primary); width: 0%; transition: width 1s ease;"></div>
       </div>
-      <div style="font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; color: var(--color-text);" id="year-display">
-        2024</div>
     </div>
   </div>
-</div>
 
-<div class="grid grid-2">
-  <!-- To-Dos -->
-  <div class="card todo-card glass-panel">
+  <!-- Weather -->
+  <div class="card bento-card area-weather weather-card-bento" id="weather-widget">
+    <div class="spinner" style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+  </div>
+
+  <!-- Tasks -->
+  <div class="card bento-card area-tasks">
     <div class="section-header">
       <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        Daily Tasks
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Tasks
       </div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <span class="badge"
-          style="background: rgba(167, 139, 250, 0.1); color: var(--color-primary); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">{{
-          todos|length }} Items</span>
-        {% if session.role != 'guest' and (todos | selectattr('done', 'equalto', 1) | list | length) > 0 %}
-        <form method="POST" action="{{ url_for('todo_clear_completed') }}" style="margin: 0;">
-          <button type="submit" class="btn btn-ghost"
-            style="padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; border-color: var(--color-primary); color: var(--color-primary);">Clear
-            Done</button>
-        </form>
-        {% endif %}
-      </div>
+      <a href="{{ url_for('notes_list') }}" class="btn btn-ghost btn-sm">Manage</a>
     </div>
-
-    {% if session.role != 'guest' %}
-    <div class="progress-section"
-      style="margin-bottom: 2rem; background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
-      {% set done_count = todos | selectattr('done', 'equalto', 1) | list | length %}
-      {% set total = todos | length %}
-      {% set pct = ((done_count / total * 100) | int) if total > 0 else 0 %}
-      <div class="progress-info"
-        style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.85rem; font-weight: 800;">
-        <span>Task Completion</span>
-        <span style="color: var(--color-primary);">{{ pct }}%</span>
-      </div>
-      <div class="progress-track"
-        style="height: 8px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden;">
-        <div class="progress-fill"
-          style="height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); width: 0%; transition: width 1s ease-out;"
-          data-pct="{{ pct }}"></div>
-      </div>
-    </div>
-
-    <form id="todo-add-form" method="POST" action="{{ url_for('todo_add') }}"
-      style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
-      <input id="todo-input" type="text" name="content" placeholder="Add a new task..." maxlength="300" required
-        style="flex: 1; height: 54px;">
-      <button type="submit" class="btn btn-primary"
-        style="padding: 0 1.5rem; height: 54px; border-radius: 16px;">Add</button>
-    </form>
-    {% endif %}
-
-    <div class="todo-list" id="todo-list">
-      {% for todo in todos %}
-      <div class="todo-item {% if todo.done %}done{% endif %}">
-        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}"
-          onsubmit="if(!this.closest('.todo-item').classList.contains('done')){ triggerConfetti(event); }">
-          <button type="submit" class="todo-check" style="position: relative; overflow: hidden;">
-            {% if todo.done %}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            {% endif %}
-          </button>
-        </form>
-        <span class="todo-text" style="flex: 1; font-weight: 600;">{{ todo.content }}</span>
-        {% if session.role != 'guest' %}
-        <form method="POST" action="{{ url_for('todo_delete', todo_id=todo.id) }}">
-          <button type="submit" class="btn btn-ghost"
-            style="padding: 0.4rem; border-radius: 10px; width: 36px; height: 36px; color: var(--color-muted); border: none;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-          </button>
-        </form>
-        {% endif %}
+    <div style="margin-top: 1rem;">
+      {% for todo in todos[:5] %}
+      <div class="task-item">
+        <div style="font-weight: 700; font-size: 0.95rem;">{{ todo.content }}</div>
+        <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 0.25rem;">{{ todo.author|capitalize }}</div>
       </div>
       {% endfor %}
       {% if not todos %}
-      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted);">
-        <p style="font-weight: 600; color: var(--color-text); font-size: 1rem;">No tasks for today.</p>
-      </div>
+      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted); font-size: 0.9rem;">Clear for now.</div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Announcements -->
-  <div class="card glass-panel">
-    <div class="section-header">
+  <!-- Feed -->
+  <div class="card bento-card area-feed" style="padding: 0;">
+    <div class="section-header" style="padding: 1.5rem 1.5rem 0.5rem 1.5rem;">
       <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent);"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        Family Feed
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent);"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        Updates
       </div>
-      <a href="{{ url_for('board') }}" class="btn btn-ghost"
-        style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 12px;">View All</a>
     </div>
-
-    <div class="ann-list" style="display: flex; flex-direction: column; gap: 1rem;">
+    <div style="margin-top: 0.5rem;">
       {% for ann in announcements[:3] %}
-      <div class="ann-item {% if ann.pinned %}is-pinned{% endif %}"
-        style="padding: 1.5rem; background: rgba(255, 255, 255, 0.02); border-radius: var(--radius-sm); border: 1px solid var(--color-border); transition: all var(--transition); cursor: pointer;"
-        onclick="window.location.href='{{ url_for('board') }}'">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-          <div class="ann-title" style="font-weight: 800; font-size: 1.1rem;">{{ ann.title }}</div>
-          {% if ann.pinned %}
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent);"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-          {% endif %}
-        </div>
-        {% if ann.body %}
-        <div class="ann-body"
-          style="font-size: 0.9rem; color: var(--color-muted); line-height: 1.6; margin-bottom: 1.25rem;">
-          {{ ann.body[:140] }}{% if ann.body|length > 140 %}&hellip;{% endif %}
-        </div>
-        {% endif %}
-        <div class="ann-footer"
-          style="display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <div class="avatar" style="width: 20px; height: 20px; font-size: 0.6rem;">{{ ann.author[0]|upper }}</div>
-            <span>{{ ann.author|capitalize }}</span>
-          </div>
-          <span>{{ ann.created_at[:10] }}</span>
-        </div>
+      <div class="feed-item" onclick="window.location.href='{{ url_for('board') }}'">
+        <div style="font-weight: 700; font-size: 1rem; line-height: 1.4;">{{ ann.title }}</div>
+        <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 0.4rem;">{{ ann.author|capitalize }} • {{ ann.created_at[:10] }}</div>
       </div>
       {% endfor %}
       {% if not announcements %}
-      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted);">
-        <p style="font-weight: 600; color: var(--color-text); font-size: 1rem;">No recent announcements.</p>
-      </div>
-      {% endif %}
-    </div>
-  </div>
-</div>
-
-<div class="grid grid-3" style="margin-top: 1.5rem;">
-  <!-- Weather -->
-  <div class="card weather-card glass-panel" id="weather-widget">
-    <div style="text-align: center; padding: 2.5rem 0; opacity: 0.5;">
-      <div class="spinner"
-        style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;">
-      </div>
-      <span style="font-weight: 500; font-size: 0.85rem;">Checking weather...</span>
-    </div>
-  </div>
-
-  <!-- Quick Links -->
-  <div class="card glass-panel">
-    <div class="section-header">
-      <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-        Quick Access
-      </div>
-    </div>
-
-    <div class="quick-links">
-      {% for bm in bookmarks %}
-      <a href="{{ bm.url }}" target="_blank" class="link-item">
-        <div class="link-icon"
-          style="background: rgba(255,255,255,0.05); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-          {{ bm.icon }}</div>
-        <span class="link-label" style="margin-top: 0.25rem;">{{ bm.title }}</span>
-      </a>
-      {% endfor %}
-      {% if session.role != 'guest' %}
-      <a href="{{ url_for('admin_panel') }}" class="link-item"
-        style="border-style: dashed; background: transparent; opacity: 0.6;">
-        <div class="link-icon"
-          style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 2px dashed var(--color-border);">
-          +</div>
-        <span class="link-label">Manage</span>
-      </a>
+      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted); font-size: 0.9rem;">No new updates.</div>
       {% endif %}
     </div>
   </div>
 
-  <!-- Upcoming Events -->
-  <div class="card glass-panel">
+  <!-- Calendar -->
+  <div class="card bento-card area-calendar">
     <div class="section-header">
       <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-info);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-info);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         Timeline
       </div>
-      <a href="{{ url_for('calendar') }}" class="btn btn-ghost"
-        style="padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: 12px;">Full View</a>
     </div>
-
-    <div style="display: flex; flex-direction: column; gap: 1rem;">
-      {% for ev in events[:3] %}
-      <div
-        style="padding: 1.25rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); transition: all var(--transition); cursor: pointer;"
-        onclick="window.location.href='{{ url_for('calendar') }}'">
-        <div style="font-weight: 800; font-size: 1rem; margin-bottom: 0.5rem;">{{ ev.title }}</div>
-        <div
-          style="font-size: 0.75rem; color: var(--color-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          {{ ev.event_date[:10] }}
-        </div>
-      </div>
-      {% endfor %}
-      {% if not events %}
-      <div style="text-align: center; color: var(--color-muted); padding: 3rem 0;">
-        <p style="font-size: 0.9rem; font-weight: 600;">No upcoming events.</p>
-      </div>
-      {% endif %}
-  </div>
-
-  <!-- Family Status Board -->
-  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem; background: linear-gradient(135deg, rgba(167, 139, 250, 0.03), rgba(59, 130, 246, 0.03));">
-    <div class="section-header">
-      <div class="section-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-danger);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-        Family Status Board
-      </div>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
-      {% for u in all_users %}
-      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; transition: all var(--transition);" class="status-card">
-        <div class="avatar" style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(167, 139, 250, 0.2);">{{ u.username[0]|upper }}</div>
-        <div style="flex: 1;">
-          <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.25rem;">{{ u.username|capitalize }}</div>
-          
-          {% if session.user_id == u.id %}
-          <form method="POST" action="{{ url_for('update_status') }}" style="margin: 0;">
-            <select name="status" onchange="this.form.submit()" 
-              style="padding: 4px 8px; font-size: 0.8rem; border-radius: 8px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.2); color: var(--color-primary); font-weight: 700; width: auto;">
-              {% for s in ['Available', 'Busy', 'Out', 'School', 'Work', 'Vacation', 'Sleeping'] %}
-              <option value="{{ s }}" {% if u.status == s %}selected{% endif %}>{{ s }}</option>
-              {% endfor %}
-            </select>
-          </form>
-          {% else %}
-          <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--color-muted); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">{{ u.status }}</span>
-          {% endif %}
-        </div>
+    <div style="margin-top: 1rem;">
+      {% for ev in events[:2] %}
+      <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 10px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.1);" onclick="window.location.href='{{ url_for('calendar') }}'">
+        <div style="font-weight: 800; color: var(--color-info); font-size: 0.9rem;">{{ ev.event_date[8:10] }}</div>
+        <div style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ev.title }}</div>
       </div>
       {% endfor %}
     </div>
   </div>
+
+  <!-- Links -->
+  <div class="card bento-card area-links">
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; height: 100%;">
+      {% for bm in bookmarks[:5] %}
+      <a href="{{ bm.url }}" target="_blank" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--color-border); font-size: 1.2rem; aspect-ratio: 1;">{{ bm.icon }}</a>
+      {% endfor %}
+      <a href="{{ url_for('admin_panel') }}" style="display: flex; align-items: center; justify-content: center; border: 2px dashed var(--color-border); border-radius: 12px; opacity: 0.4; aspect-ratio: 1;">+</a>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
-  function triggerConfetti(e) {
-    var rect = e.target.getBoundingClientRect();
-    var x = (rect.left + rect.width / 2) / window.innerWidth;
-    var y = (rect.top + rect.height / 2) / window.innerHeight;
-    confetti({
-      particleCount: 60,
-      spread: 70,
-      origin: { x: x, y: y },
-      colors: ['#a78bfa', '#f472b6', '#10b981', '#3b82f6']
-    });
-  }
-  (function () {
-    // Progress bar animation
-    document.querySelectorAll('.progress-fill').forEach(el => {
-      setTimeout(() => {
-        el.style.width = el.getAttribute('data-pct') + '%';
-      }, 300);
-    });
-
-    // Greeting logic
-    const greetEl = document.getElementById('greeting-text');
+  (function() {
+    // Time & Date
     const dateEl = document.getElementById('date-display');
-    const h = new Date().getHours();
-    const salutation = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-    if (greetEl) greetEl.textContent = salutation + ', {{ session.username|capitalize }}.';
-
     if (dateEl) {
       const now = new Date();
-      dateEl.textContent = now.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric'
-      });
-
-      // Year progress calculation
-      const start = new Date(now.getFullYear(), 0, 1);
-      const end = new Date(now.getFullYear() + 1, 0, 1);
-      const progress = (now - start) / (end - start);
-      const yearPct = Math.floor(progress * 100);
-
-      const yearBar = document.getElementById('year-bar');
-      const yearPctText = document.getElementById('year-pct');
-      const yearDisplay = document.getElementById('year-display');
-
-      if (yearBar) {
-        setTimeout(() => {
-          yearBar.style.width = yearPct + '%';
-          if (yearPctText) yearPctText.textContent = yearPct + '%';
-          const daysLeft = Math.floor((end - now) / 86400000);
-          if (yearDisplay) yearDisplay.textContent = now.getFullYear() + ' • ' + daysLeft + ' days remaining';
-        }, 500);
-      }
+      dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     }
 
-    // Weather Fetching
+    // Year Progress
+    const yearPct = document.getElementById('year-pct');
+    const yearBar = document.getElementById('year-bar');
+    if (yearBar) {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear() + 1, 0, 1);
+      const pct = Math.floor((now - start) / (end - start) * 100);
+      setTimeout(() => {
+        yearBar.style.width = pct + '%';
+        yearPct.textContent = pct + '%';
+      }, 500);
+    }
+
+    // Weather
     function fetchWeather() {
       const lat = -37.9034;
       const lon = 145.0416;
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius&windspeed_unit=kmh`;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=celsius`;
 
       fetch(url)
         .then(res => res.json())
         .then(data => {
-          if (!data.current_weather) return;
           const w = data.current_weather;
-          const wmoIcons = {
-            0: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-            1: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M2 12h2"></path><path d="m4.93 19.07 1.41-1.41"></path><path d="M12 22v2"></path><path d="m19.07 19.07-1.41-1.41"></path><path d="M22 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg>',
-            2: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M2 12h2"></path><path d="m4.93 19.07 1.41-1.41"></path><path d="M12 22v2"></path><path d="m19.07 19.07-1.41-1.41"></path><path d="M22 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg>',
-            3: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19x2.5"></path><path d="M17.5 19a3.5 3.5 0 1 1 0-7c.28 0 .56.02.83.06a4.5 4.5 0 1 1 6.13 4.7 3.5 3.5 0 0 1-7 0Z"></path><path d="M12 12H3a5 5 0 1 1 4.9-6H12a3 3 0 0 1 0 6Z"></path></svg>',
-            default: '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg>'
-          };
-
-          const wmoCodes = {
-            0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
-            45: 'Fog', 48: 'Depositing rime',
-            51: 'Light drizzle', 53: 'Moderate drizzle', 55: 'Dense drizzle',
-            61: 'Slight rain', 63: 'Moderate rain', 65: 'Heavy rain',
-            71: 'Slight snow', 73: 'Moderate snow', 75: 'Heavy snow',
-            95: 'Thunderstorm'
-          };
-          
-          const desc = wmoCodes[w.weathercode] || 'Unknown';
-          const icon = wmoIcons[w.weathercode] || wmoIcons.default;
-
           const widget = document.getElementById('weather-widget');
-          if (widget) {
+          if (widget && w) {
             widget.innerHTML = `
-              <div class="weather-main">
-                <div class="weather-temp-wrap">
-                  <div class="weather-temp-big">${Math.round(w.temperature)}°</div>
-                  <div style="font-weight: 700; color: var(--color-primary); margin-top: 0.25rem;">${desc}</div>
-                </div>
-                <div class="weather-icon-big">${icon}</div>
-              </div>
-              <div class="weather-details">
-                <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  Ormond, VIC
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; justify-content: flex-end;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
-                  ${w.windspeed} km/h
-                </div>
-              </div>
+              <div style="font-size: 2.5rem; font-weight: 800;">${Math.round(w.temperature)}°</div>
+              <div style="font-size: 0.8rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; margin-top: 0.25rem;">Ormond</div>
             `;
           }
         })
-        .catch(err => {
-          console.error('Weather fetch error:', err);
+        .catch(() => {
           const widget = document.getElementById('weather-widget');
-          if (widget) widget.innerHTML = '<p style="text-align: center; color: var(--color-danger);">Weather unavailable</p>';
+          if (widget) widget.innerHTML = '<div style="font-size: 0.8rem;">Weather Offline</div>';
         });
     }
     fetchWeather();

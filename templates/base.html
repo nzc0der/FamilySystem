@@ -14,13 +14,13 @@
        Design tokens
     --------------------------------------------------------------- */
     :root {
-      --color-bg: #0b0c10;
-      --color-surface: #1a1c23;
-      --color-surface-2: #252833;
-      --color-border: rgba(255, 255, 255, 0.05);
-      --color-primary: #6366f1;
-      --color-primary-dk: #4f46e5;
-      --color-accent: #c084fc;
+      --color-bg: #05060e;
+      --color-surface: #11121d;
+      --color-surface-2: #1a1c2b;
+      --color-border: rgba(255, 255, 255, 0.04);
+      --color-primary: #5155f5;
+      --color-primary-dk: #3f43d6;
+      --color-accent: #a78bfa;
       --color-success: #10b981;
       --color-warning: #f59e0b;
       --color-danger: #ef4444;
@@ -28,11 +28,9 @@
       --color-text: #f8fafc;
       --color-muted: #64748b;
       --radius-sm: 8px;
-      --radius: 12px;
-      --radius-lg: 24px;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --radius: 16px;
+      --radius-lg: 32px;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
       --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -51,8 +49,8 @@
       font-family: 'Outfit', -apple-system, sans-serif;
       background: var(--color-bg);
       background-image: 
-        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(192, 132, 252, 0.05) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(81, 85, 245, 0.05) 0px, transparent 40%),
+        radial-gradient(at 100% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 40%);
       color: var(--color-text);
       min-height: 100vh;
       line-height: 1.5;
@@ -155,9 +153,9 @@
     }
 
     .nav-links a.active {
-      background: rgba(99, 102, 241, 0.08);
+      background: rgba(81, 85, 245, 0.1);
       color: var(--color-primary);
-      border: 1px solid rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(81, 85, 245, 0.1);
     }
 
     .nav-right {
@@ -309,10 +307,24 @@
       padding: 1.5rem;
       box-shadow: var(--shadow);
       transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
     }
 
     .card:hover {
-      border-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.08);
+      transform: translateY(-2px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     /* Buttons */
