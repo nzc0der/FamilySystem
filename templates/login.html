@@ -62,8 +62,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2rem;
-      box-shadow: 0 10px 30px rgba(167, 139, 250, 0.4);
+      box-shadow: 0 10px 30px rgba(157, 170, 255, 0.3);
+    }
+
+    .logo svg {
+      width: 32px;
+      height: 32px;
+      stroke: #000;
+      stroke-width: 2.5;
     }
 
     h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.04em; }
@@ -169,7 +175,9 @@
 </head>
 <body>
   <div class="login-card">
-    <div class="logo">🏠</div>
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+    </div>
     <h1>Welcome Home</h1>
     <p class="subtitle">Enter your family credentials</p>
 
@@ -191,7 +199,9 @@
         {% endfor %}
         <!-- Guest Option -->
         <div class="profile-item" onclick="selectUser('guest', this)">
-          <div class="profile-avatar" style="background: rgba(255,255,255,0.03); border: 2px dashed var(--color-border);">👤</div>
+          <div class="profile-avatar" style="background: rgba(255,255,255,0.03); border: 2px dashed var(--color-border);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
           <div class="profile-name">Guest</div>
         </div>
       </div>
@@ -207,7 +217,7 @@
     </form>
     
     <div style="margin-top: 2rem; font-size: 0.8rem; color: var(--color-muted); font-weight: 600;">
-      FamilyDashboard v2.0 • Secured for Raspberry Pi
+      FamilySystem v2.5 • Secured & Refined
     </div>
   </div>
 
