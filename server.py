@@ -237,10 +237,8 @@ def _register_routes(app: Flask) -> None:
         user_id = session["user_id"]
         todos = settings.get_todos(user_id)
         notes = settings.get_notes()
-        announcements = settings.get_announcements()[:3]  # Preview top 3.
-        bookmarks = settings.get_bookmarks()
         events = settings.get_events()
-        meal_plan = settings.get_meal_plan()
+        all_users = settings.get_users()
         return render_template(
             "dashboard.html",
             todos=todos,
@@ -248,7 +246,7 @@ def _register_routes(app: Flask) -> None:
             announcements=announcements,
             bookmarks=bookmarks,
             events=events,
-            meal_plan=meal_plan,
+            all_users=all_users,
         )
 
     # --- To-dos ---
@@ -459,20 +457,14 @@ def _register_routes(app: Flask) -> None:
         return redirect(url_for("shopping"))
 
     # ------------------------------------------------------------------
-    # Meal Plan
+    # Status Board
     # ------------------------------------------------------------------
 
-    @app.route("/meal/update", methods=["POST"])
+    @app.route("/status/update", methods=["POST"])
     @login_required
-    def update_meal():
-        if session.get("role") == "guest":
-            flash("Guests cannot update the meal plan.", "warning")
-            return redirect(url_for("dashboard"))
-            
-        day = request.form.get("day", "").strip()
-        meal = request.form.get("meal", "").strip()
-        if day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
-            settings.update_meal_plan(day, meal)
+    def update_status():
+        status = request.form.get("status", "Available").strip()
+        settings.update_user_status(session["user_id"], status)
         return redirect(url_for("dashboard"))
 
     # ------------------------------------------------------------------

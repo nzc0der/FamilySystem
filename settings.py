@@ -238,6 +238,11 @@ def init_schema() -> None:
         )
         
         try:
+            conn.execute("ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'Available';")
+        except sqlite3.OperationalError:
+            pass
+
+        try:
             conn.execute("ALTER TABLE users ADD COLUMN shopping_permission TEXT DEFAULT 'full';")
         except sqlite3.OperationalError:
             pass
@@ -263,7 +268,7 @@ def get_users() -> list[dict]:
     """
     with _get_db() as conn:
         rows = conn.execute(
-            "SELECT id, username, password_hash, role, created_at, shopping_permission FROM users ORDER BY id"
+            "SELECT id, username, password_hash, role, created_at, shopping_permission, status FROM users ORDER BY id"
         ).fetchall()
     return [dict(row) for row in rows]
 
@@ -379,6 +384,13 @@ def set_shopping_permission(user_id: int, permission: str) -> None:
     with _get_db() as conn:
         conn.execute("UPDATE users SET shopping_permission = ? WHERE id = ?", (permission, user_id))
     logger.info("User id %d shopping permission set to '%s'.", user_id, permission)
+
+
+def update_user_status(user_id: int, status: str) -> None:
+    """Update the current status of a user."""
+    with _get_db() as conn:
+        conn.execute("UPDATE users SET status = ? WHERE id = ?", (status, user_id))
+    logger.info("User id %d status updated to '%s'.", user_id, status)
 
 
 def delete_user(user_id: int) -> None:

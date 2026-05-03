@@ -442,63 +442,37 @@
       {% endif %}
   </div>
 
-  <!-- Weekly Meal Plan -->
-  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem;">
+  <!-- Family Status Board -->
+  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem; background: linear-gradient(135deg, rgba(167, 139, 250, 0.03), rgba(59, 130, 246, 0.03));">
     <div class="section-header">
       <div class="section-title">
-        <span>🍽️</span>
-        Weekly Meal Plan
+        <span>📍</span>
+        Family Status Board
       </div>
     </div>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem;">
-      {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-      {% for day in days %}
-      {% set meal = meal_plan.get(day, '') %}
-      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1.25rem; text-align: center; transition: all var(--transition);" class="meal-card">
-        <div style="font-size: 0.7rem; font-weight: 800; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem;">{{ day }}</div>
-        
-        {% if session.role != 'guest' %}
-        <form method="POST" action="{{ url_for('update_meal') }}" style="margin: 0;">
-          <input type="hidden" name="day" value="{{ day }}">
-          <input type="text" name="meal" value="{{ meal }}" placeholder="Tap to set..." 
-            style="width: 100%; text-align: center; background: transparent; border: none; border-bottom: 1px dashed var(--color-border); border-radius: 0; padding: 0.4rem; font-size: 0.95rem; color: var(--color-text); font-weight: 600;"
-            onchange="this.form.submit()">
-        </form>
-        {% else %}
-        <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-text); min-height: 24px;">{{ meal or 'Undecided' }}</div>
-        {% endif %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+      {% for u in all_users %}
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; transition: all var(--transition);" class="status-card">
+        <div class="avatar" style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(167, 139, 250, 0.2);">{{ u.username[0]|upper }}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 800; font-size: 1.1rem; margin-bottom: 0.25rem;">{{ u.username|capitalize }}</div>
+          
+          {% if session.user_id == u.id %}
+          <form method="POST" action="{{ url_for('update_status') }}" style="margin: 0;">
+            <select name="status" onchange="this.form.submit()" 
+              style="padding: 4px 8px; font-size: 0.8rem; border-radius: 8px; background: rgba(167, 139, 250, 0.1); border: 1px solid rgba(167, 139, 250, 0.2); color: var(--color-primary); font-weight: 700; width: auto;">
+              {% for s in ['Available', 'Busy', 'Out', 'School', 'Work', 'Vacation', 'Sleeping'] %}
+              <option value="{{ s }}" {% if u.status == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </form>
+          {% else %}
+          <span class="badge" style="background: rgba(255,255,255,0.05); color: var(--color-muted); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">{{ u.status }}</span>
+          {% endif %}
+        </div>
       </div>
       {% endfor %}
-    </div>
-  </div>
-
-  <!-- Home Essentials -->
-  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; padding: 0.5rem;">
-      <div style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 54px; height: 54px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(59,130,246,0.1);">📶</div>
-        <div>
-          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Family WiFi</div>
-          <div style="font-weight: 800; font-size: 1.15rem;">HomeNet_5G <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 6px;">Pass: 12345678</span></div>
-        </div>
-      </div>
-      
-      <div style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 54px; height: 54px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(16,185,129,0.1);">🗑️</div>
-        <div>
-          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Trash Day</div>
-          <div style="font-weight: 800; font-size: 1.15rem;">Wednesday <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem;">(Bins out Tue night)</span></div>
-        </div>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 1.25rem;">
-        <div style="width: 54px; height: 54px; background: rgba(245, 158, 11, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(245,158,11,0.1);">📞</div>
-        <div>
-          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Emergency</div>
-          <div style="font-weight: 800; font-size: 1.15rem;">000 <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem;">Police: 9555 1234</span></div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
