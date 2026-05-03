@@ -229,6 +229,11 @@ def init_schema() -> None:
                 added_by    INTEGER REFERENCES users(id) ON DELETE SET NULL,
                 created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS meal_plan (
+                day         TEXT PRIMARY KEY,
+                meal        TEXT NOT NULL DEFAULT ''
+            );
             """
         )
         
@@ -669,4 +674,23 @@ def delete_shopping_item(item_id: int) -> None:
     """Delete a shopping item by id."""
     with _get_db() as conn:
         conn.execute("DELETE FROM shopping_items WHERE id = ?", (item_id,))
+
+
+# ---------------------------------------------------------------------------
+# Meal Plan helpers
+# ---------------------------------------------------------------------------
+
+def get_meal_plan() -> dict:
+    """Return the weekly meal plan as a dictionary {day: meal}."""
+    with _get_db() as conn:
+        rows = conn.execute("SELECT day, meal FROM meal_plan").fetchall()
+    return {r["day"]: r["meal"] for r in rows}
+
+def update_meal_plan(day: str, meal: str) -> None:
+    """Update the meal plan for a specific day."""
+    with _get_db() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO meal_plan (day, meal) VALUES (?, ?)",
+            (day, meal.strip())
+        )
 

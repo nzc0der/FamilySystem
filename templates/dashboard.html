@@ -208,20 +208,24 @@
 <div class="greeting-container">
   <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 class="greeting" id="greeting-text">Hello, {{ session.username }}.</h1>
-      <div class="date-display" id="date-display"></div>
+      <h1 class="greeting" id="greeting-text" style="animation: slideDown 0.5s ease-out;">Hello, {{ session.username }}.
+      </h1>
+      <div class="date-display" id="date-display" style="animation: fadeIn 0.8s ease-out;"></div>
     </div>
 
     <!-- Yearly Progress -->
-    <div class="year-card glass-panel" style="padding: 1rem 1.5rem; min-width: 240px;">
+    <div class="year-card glass-panel"
+      style="padding: 1rem 1.5rem; min-width: 240px; transform: translateY(0); transition: transform 0.3s ease; cursor: pointer;"
+      onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
       <div
         style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.05em;">
         <span>Year Progress</span>
         <span id="year-pct">0%</span>
       </div>
-      <div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden;">
+      <div
+        style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);">
         <div id="year-bar"
-          style="height: 100%; background: linear-gradient(90deg, var(--color-accent), var(--color-primary)); width: 0%; transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+          style="height: 100%; background: linear-gradient(90deg, var(--color-accent), var(--color-primary), var(--color-info)); background-size: 200% 200%; animation: gradientMove 3s ease infinite; width: 0%; transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
         </div>
       </div>
       <div style="font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; color: var(--color-text);" id="year-display">
@@ -238,9 +242,18 @@
         <span>✅</span>
         Daily Tasks
       </div>
-      <span class="badge"
-        style="background: rgba(167, 139, 250, 0.1); color: var(--color-primary); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">{{
-        todos|length }} Items</span>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span class="badge"
+          style="background: rgba(167, 139, 250, 0.1); color: var(--color-primary); padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800;">{{
+          todos|length }} Items</span>
+        {% if session.role != 'guest' and (todos | selectattr('done', 'equalto', 1) | list | length) > 0 %}
+        <form method="POST" action="{{ url_for('todo_clear_completed') }}" style="margin: 0;">
+          <button type="submit" class="btn btn-ghost"
+            style="padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 800; border-color: var(--color-primary); color: var(--color-primary);">Clear
+            Done</button>
+        </form>
+        {% endif %}
+      </div>
     </div>
 
     {% if session.role != 'guest' %}
@@ -274,8 +287,9 @@
     <div class="todo-list" id="todo-list">
       {% for todo in todos %}
       <div class="todo-item {% if todo.done %}done{% endif %}">
-        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}">
-          <button type="submit" class="todo-check">
+        <form method="POST" action="{{ url_for('todo_toggle', todo_id=todo.id) }}"
+          onsubmit="if(!this.closest('.todo-item').classList.contains('done')){ triggerConfetti(event); }">
+          <button type="submit" class="todo-check" style="position: relative; overflow: hidden;">
             {% if todo.done %}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"
               stroke-linecap="round" stroke-linejoin="round">
@@ -324,7 +338,7 @@
       {% for ann in announcements[:3] %}
       <div class="ann-item {% if ann.pinned %}is-pinned{% endif %}"
         style="padding: 1.5rem; background: rgba(255, 255, 255, 0.02); border-radius: var(--radius-sm); border: 1px solid var(--color-border); transition: all var(--transition); cursor: pointer;"
-        onclick="window.location.href='{{ url_for('board') }}'">
+        onclick="window.location.href='{{ url_for('board') }}';">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
           <div class="ann-title" style="font-weight: 800; font-size: 1.1rem;">{{ ann.title }}</div>
           {% if ann.pinned %}<span style="font-size: 0.8rem;">📌</span>{% endif %}
@@ -412,7 +426,7 @@
       {% for ev in events[:3] %}
       <div
         style="padding: 1.25rem; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm); border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); transition: all var(--transition); cursor: pointer;"
-        onclick="window.location.href='{{ url_for('calendar') }}'">
+        onclick="window.location.href='{{ url_for('calendar') }}';">
         <div style="font-weight: 800; font-size: 1rem; margin-bottom: 0.5rem;">{{ ev.title }}</div>
         <div
           style="font-size: 0.75rem; color: var(--color-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem;">
@@ -426,13 +440,84 @@
         <p style="font-size: 0.9rem; font-weight: 700;">Clear schedule</p>
       </div>
       {% endif %}
+  </div>
+
+  <!-- Weekly Meal Plan -->
+  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem;">
+    <div class="section-header">
+      <div class="section-title">
+        <span>🍽️</span>
+        Weekly Meal Plan
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem;">
+      {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+      {% for day in days %}
+      {% set meal = meal_plan.get(day, '') %}
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 1.25rem; text-align: center; transition: all var(--transition);" class="meal-card">
+        <div style="font-size: 0.7rem; font-weight: 800; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem;">{{ day }}</div>
+        
+        {% if session.role != 'guest' %}
+        <form method="POST" action="{{ url_for('update_meal') }}" style="margin: 0;">
+          <input type="hidden" name="day" value="{{ day }}">
+          <input type="text" name="meal" value="{{ meal }}" placeholder="Tap to set..." 
+            style="width: 100%; text-align: center; background: transparent; border: none; border-bottom: 1px dashed var(--color-border); border-radius: 0; padding: 0.4rem; font-size: 0.95rem; color: var(--color-text); font-weight: 600;"
+            onchange="this.form.submit()">
+        </form>
+        {% else %}
+        <div style="font-size: 0.95rem; font-weight: 600; color: var(--color-text); min-height: 24px;">{{ meal or 'Undecided' }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Home Essentials -->
+  <div class="card glass-panel" style="grid-column: 1 / -1; margin-top: 1.5rem; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.05));">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem; padding: 0.5rem;">
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div style="width: 54px; height: 54px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(59,130,246,0.1);">📶</div>
+        <div>
+          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Family WiFi</div>
+          <div style="font-weight: 800; font-size: 1.15rem;">HomeNet_5G <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 6px;">Pass: 12345678</span></div>
+        </div>
+      </div>
+      
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div style="width: 54px; height: 54px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(16,185,129,0.1);">🗑️</div>
+        <div>
+          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Trash Day</div>
+          <div style="font-weight: 800; font-size: 1.15rem;">Wednesday <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem;">(Bins out Tue night)</span></div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        <div style="width: 54px; height: 54px; background: rgba(245, 158, 11, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 8px 16px rgba(245,158,11,0.1);">📞</div>
+        <div>
+          <div style="font-size: 0.7rem; font-weight: 900; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.2rem;">Emergency</div>
+          <div style="font-weight: 800; font-size: 1.15rem;">000 <span style="font-weight: 500; font-size: 0.85rem; color: var(--color-muted); margin-left: 0.75rem;">Police: 9555 1234</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <script>
+  function triggerConfetti(e) {
+    var rect = e.target.getBoundingClientRect();
+    var x = (rect.left + rect.width / 2) / window.innerWidth;
+    var y = (rect.top + rect.height / 2) / window.innerHeight;
+    confetti({
+      particleCount: 60,
+      spread: 70,
+      origin: { x: x, y: y },
+      colors: ['#a78bfa', '#f472b6', '#10b981', '#3b82f6']
+    });
+  }
   (function () {
     // Progress bar animation
     document.querySelectorAll('.progress-fill').forEach(el => {

@@ -240,6 +240,7 @@ def _register_routes(app: Flask) -> None:
         announcements = settings.get_announcements()[:3]  # Preview top 3.
         bookmarks = settings.get_bookmarks()
         events = settings.get_events()
+        meal_plan = settings.get_meal_plan()
         return render_template(
             "dashboard.html",
             todos=todos,
@@ -247,6 +248,7 @@ def _register_routes(app: Flask) -> None:
             announcements=announcements,
             bookmarks=bookmarks,
             events=events,
+            meal_plan=meal_plan,
         )
 
     # --- To-dos ---
@@ -272,6 +274,19 @@ def _register_routes(app: Flask) -> None:
     @login_required
     def todo_delete(todo_id: int):
         settings.delete_todo(todo_id, session["user_id"])
+        return redirect(url_for("dashboard"))
+
+    @app.route("/todos/clear_completed", methods=["POST"])
+    @login_required
+    def todo_clear_completed():
+        if session.get("role") == "guest":
+            flash("Guests cannot delete to-dos.", "warning")
+            return redirect(url_for("dashboard"))
+        
+        todos = settings.get_todos(session["user_id"])
+        for t in todos:
+            if t["done"]:
+                settings.delete_todo(t["id"], session["user_id"])
         return redirect(url_for("dashboard"))
 
     # --- Notes ---
@@ -442,6 +457,23 @@ def _register_routes(app: Flask) -> None:
             
         settings.delete_shopping_item(item_id)
         return redirect(url_for("shopping"))
+
+    # ------------------------------------------------------------------
+    # Meal Plan
+    # ------------------------------------------------------------------
+
+    @app.route("/meal/update", methods=["POST"])
+    @login_required
+    def update_meal():
+        if session.get("role") == "guest":
+            flash("Guests cannot update the meal plan.", "warning")
+            return redirect(url_for("dashboard"))
+            
+        day = request.form.get("day", "").strip()
+        meal = request.form.get("meal", "").strip()
+        if day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']:
+            settings.update_meal_plan(day, meal)
+        return redirect(url_for("dashboard"))
 
     # ------------------------------------------------------------------
     # Profile
