@@ -4,232 +4,187 @@
 
 {% block extra_head %}
 <style>
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto;
-    grid-template-areas: 
-      "greet greet greet weather"
-      "tasks tasks feed feed"
-      "tasks tasks calendar links";
-    gap: 1.5rem;
-    margin-top: 1rem;
+  .dashboard-header {
+    margin-bottom: 3rem;
   }
 
-  .bento-card {
-    position: relative;
-    overflow: hidden;
+  .main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  .sidebar {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    gap: 2rem;
   }
 
-  /* Area assignments */
-  .area-greet { grid-area: greet; }
-  .area-weather { grid-area: weather; }
-  .area-tasks { grid-area: tasks; }
-  .area-feed { grid-area: feed; }
-  .area-calendar { grid-area: calendar; }
-  .area-links { grid-area: links; }
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-muted);
+    margin-bottom: 1rem;
+    display: block;
+  }
 
-  /* Greet Card Special */
-  .greet-card {
-    background: transparent;
-    border: none;
-    padding: 0;
+  /* List Styles */
+  .list-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .list-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: var(--transition);
   }
 
-  .greeting-text {
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
+  .list-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .item-title {
+    font-weight: 700;
+    font-size: 1.1rem;
     color: var(--color-text);
   }
 
-  /* Weather Card Special */
-  .weather-card-bento {
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    border: none;
-    justify-content: center;
+  .item-meta {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    margin-top: 0.25rem;
+  }
+
+  /* Weather Mini */
+  .weather-strip {
+    display: flex;
     align-items: center;
-    text-align: center;
-  }
-
-  /* Items */
-  .task-item {
-    background: rgba(255,255,255,0.03);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border-radius: 16px;
     border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    transition: var(--transition);
-  }
-  .task-item:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.1);
   }
 
-  .feed-item {
-    padding: 1.25rem;
-    border-bottom: 1px solid var(--color-border);
-    cursor: pointer;
-  }
-  .feed-item:last-child { border-bottom: none; }
-  .feed-item:hover { background: rgba(255,255,255,0.02); }
-
-  @media (max-width: 1100px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-areas: 
-        "greet greet"
-        "weather links"
-        "tasks tasks"
-        "feed calendar";
-    }
-  }
-
-  @media (max-width: 768px) {
-    .dashboard-grid {
-      grid-template-columns: 1fr;
-      grid-template-areas: 
-        "greet"
-        "weather"
-        "tasks"
-        "feed"
-        "calendar"
-        "links";
-    }
-    .greeting-text { font-size: 2rem; }
+  @media (max-width: 992px) {
+    .main-grid { grid-template-columns: 1fr; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-grid">
-  
-  <!-- Greeting -->
-  <div class="bento-card area-greet greet-card">
+<div class="dashboard-header">
+  <h1 style="font-size: 3rem; font-weight: 800; letter-spacing: -0.04em;">Dashboard</h1>
+  <p id="date-display" style="color: var(--color-muted); font-weight: 500; font-size: 1.1rem; margin-top: 0.5rem;"></p>
+</div>
+
+<div class="main-grid">
+  <!-- Primary Content -->
+  <div class="primary-col">
+    
+    <!-- Tasks Section -->
+    <div style="margin-bottom: 3rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <span class="section-label">Active Tasks</span>
+        <a href="{{ url_for('notes_list') }}" class="btn btn-ghost btn-sm">Manage List</a>
+      </div>
+      <div class="list-stack">
+        {% for todo in todos[:5] %}
+        <div class="list-item">
+          <div>
+            <div class="item-title">{{ todo.content }}</div>
+            <div class="item-meta">{{ todo.author|capitalize }}</div>
+          </div>
+          <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary);"></div>
+        </div>
+        {% endfor %}
+        {% if not todos %}
+        <div style="text-align: center; padding: 4rem; background: rgba(255,255,255,0.01); border-radius: 12px; border: 1px dashed var(--color-border);">
+          <p style="color: var(--color-muted); font-size: 0.9rem;">No active tasks at the moment.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Announcements Section -->
     <div>
-      <h1 class="greeting-text">Hello, {{ session.username }}.</h1>
-      <p id="date-display" style="color: var(--color-muted); font-weight: 600; margin-top: 0.5rem;"></p>
-    </div>
-    <!-- Year Progress -->
-    <div class="card" style="padding: 1rem 1.5rem; min-width: 200px;">
-      <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; margin-bottom: 0.5rem;">
-        <span>Year</span>
-        <span id="year-pct">0%</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <span class="section-label">Recent Updates</span>
+        <a href="{{ url_for('board') }}" class="btn btn-ghost btn-sm">View Board</a>
       </div>
-      <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
-        <div id="year-bar" style="height: 100%; background: var(--color-primary); width: 0%; transition: width 1s ease;"></div>
+      <div class="list-stack">
+        {% for ann in announcements[:3] %}
+        <div class="list-item" onclick="window.location.href='{{ url_for('board') }}'" style="cursor: pointer;">
+          <div>
+            <div class="item-title">{{ ann.title }}</div>
+            <div class="item-meta">{{ ann.author|capitalize }} • {{ ann.created_at[:10] }}</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-muted); opacity: 0.3;"><path d="M9 18l6-6-6-6"></path></svg>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
 
-  <!-- Weather -->
-  <div class="card bento-card area-weather weather-card-bento" id="weather-widget">
-    <div class="spinner" style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-  </div>
-
-  <!-- Tasks -->
-  <div class="card bento-card area-tasks">
-    <div class="section-header">
-      <div class="section-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        Tasks
+  <!-- Sidebar -->
+  <div class="sidebar">
+    
+    <!-- Weather -->
+    <div>
+      <span class="section-label">Local Weather</span>
+      <div class="weather-strip" id="weather-widget">
+        <div class="spinner" style="width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
       </div>
-      <a href="{{ url_for('notes_list') }}" class="btn btn-ghost btn-sm">Manage</a>
     </div>
+
+    <!-- Calendar Timeline -->
+    <div>
+      <span class="section-label">Upcoming</span>
+      <div class="list-stack">
+        {% for ev in events[:4] %}
+        <div class="list-item" style="padding: 1rem; background: transparent; border-color: transparent; border-bottom: 1px solid var(--color-border); border-radius: 0;" onclick="window.location.href='{{ url_for('calendar') }}'">
+          <div>
+            <div style="font-weight: 700; font-size: 0.95rem;">{{ ev.title }}</div>
+            <div style="font-size: 0.75rem; color: var(--color-info); font-weight: 700; margin-top: 0.2rem;">{{ ev.event_date[:10] }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Quick Links -->
     <div style="margin-top: 1rem;">
-      {% for todo in todos[:5] %}
-      <div class="task-item">
-        <div style="font-weight: 700; font-size: 0.95rem;">{{ todo.content }}</div>
-        <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 0.25rem;">{{ todo.author|capitalize }}</div>
+      <span class="section-label">Quick Access</span>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+        {% for bm in bookmarks[:5] %}
+        <a href="{{ bm.url }}" target="_blank" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--color-border); font-size: 1.2rem; aspect-ratio: 1; text-decoration: none;">{{ bm.icon }}</a>
+        {% endfor %}
+        <a href="{{ url_for('admin_panel') }}" style="display: flex; align-items: center; justify-content: center; border: 2px dashed var(--color-border); border-radius: 12px; opacity: 0.3; aspect-ratio: 1; text-decoration: none;">+</a>
       </div>
-      {% endfor %}
-      {% if not todos %}
-      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted); font-size: 0.9rem;">Clear for now.</div>
-      {% endif %}
     </div>
-  </div>
 
-  <!-- Feed -->
-  <div class="card bento-card area-feed" style="padding: 0;">
-    <div class="section-header" style="padding: 1.5rem 1.5rem 0.5rem 1.5rem;">
-      <div class="section-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent);"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        Updates
-      </div>
-    </div>
-    <div style="margin-top: 0.5rem;">
-      {% for ann in announcements[:3] %}
-      <div class="feed-item" onclick="window.location.href='{{ url_for('board') }}'">
-        <div style="font-weight: 700; font-size: 1rem; line-height: 1.4;">{{ ann.title }}</div>
-        <div style="font-size: 0.75rem; color: var(--color-muted); margin-top: 0.4rem;">{{ ann.author|capitalize }} • {{ ann.created_at[:10] }}</div>
-      </div>
-      {% endfor %}
-      {% if not announcements %}
-      <div style="text-align: center; padding: 4rem 0; color: var(--color-muted); font-size: 0.9rem;">No new updates.</div>
-      {% endif %}
-    </div>
   </div>
-
-  <!-- Calendar -->
-  <div class="card bento-card area-calendar">
-    <div class="section-header">
-      <div class="section-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-info);"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        Timeline
-      </div>
-    </div>
-    <div style="margin-top: 1rem;">
-      {% for ev in events[:2] %}
-      <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 10px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.1);" onclick="window.location.href='{{ url_for('calendar') }}'">
-        <div style="font-weight: 800; color: var(--color-info); font-size: 0.9rem;">{{ ev.event_date[8:10] }}</div>
-        <div style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ev.title }}</div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- Links -->
-  <div class="card bento-card area-links">
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; height: 100%;">
-      {% for bm in bookmarks[:5] %}
-      <a href="{{ bm.url }}" target="_blank" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid var(--color-border); font-size: 1.2rem; aspect-ratio: 1;">{{ bm.icon }}</a>
-      {% endfor %}
-      <a href="{{ url_for('admin_panel') }}" style="display: flex; align-items: center; justify-content: center; border: 2px dashed var(--color-border); border-radius: 12px; opacity: 0.4; aspect-ratio: 1;">+</a>
-    </div>
-  </div>
-
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
   (function() {
-    // Time & Date
+    // Date
     const dateEl = document.getElementById('date-display');
     if (dateEl) {
       const now = new Date();
       dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    }
-
-    // Year Progress
-    const yearPct = document.getElementById('year-pct');
-    const yearBar = document.getElementById('year-bar');
-    if (yearBar) {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), 0, 1);
-      const end = new Date(now.getFullYear() + 1, 0, 1);
-      const pct = Math.floor((now - start) / (end - start) * 100);
-      setTimeout(() => {
-        yearBar.style.width = pct + '%';
-        yearPct.textContent = pct + '%';
-      }, 500);
     }
 
     // Weather
@@ -245,14 +200,13 @@
           const widget = document.getElementById('weather-widget');
           if (widget && w) {
             widget.innerHTML = `
-              <div style="font-size: 2.5rem; font-weight: 800;">${Math.round(w.temperature)}°</div>
-              <div style="font-size: 0.8rem; font-weight: 700; opacity: 0.8; text-transform: uppercase; margin-top: 0.25rem;">Ormond</div>
+              <div style="font-size: 2.25rem; font-weight: 800;">${Math.round(w.temperature)}°</div>
+              <div style="flex: 1;">
+                <div style="font-weight: 700; font-size: 0.9rem;">Ormond, VIC</div>
+                <div style="color: var(--color-muted); font-size: 0.8rem; font-weight: 600;">Wind: ${Math.round(w.windspeed)} km/h</div>
+              </div>
             `;
           }
-        })
-        .catch(() => {
-          const widget = document.getElementById('weather-widget');
-          if (widget) widget.innerHTML = '<div style="font-size: 0.8rem;">Weather Offline</div>';
         });
     }
     fetchWeather();
