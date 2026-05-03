@@ -76,8 +76,8 @@
 {% block content %}
 <div class="section-header">
   <div class="section-title">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-    System Administration
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    Settings
   </div>
 </div>
 
@@ -101,8 +101,8 @@
     <!-- User Management -->
     <div id="tab-users" class="admin-tab card admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h3 style="font-weight: 800; font-size: 1.25rem;">Family Accounts</h3>
-        <button class="btn btn-primary" onclick="document.getElementById('add-user-modal').classList.remove('hidden')">+ New User</button>
+        <h3 style="font-weight: 600; font-size: 1.1rem;">Users</h3>
+        <button class="btn btn-primary" onclick="document.getElementById('add-user-modal').classList.remove('hidden')">New User</button>
       </div>
 
       <div class="users-list">
@@ -132,9 +132,9 @@
     <!-- Backups -->
     <div id="tab-backups" class="admin-tab card admin-card hidden">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h3 style="font-weight: 800; font-size: 1.25rem;">Database Backups</h3>
+        <h3 style="font-weight: 600; font-size: 1.1rem;">Backups</h3>
         <form method="POST" action="{{ url_for('admin_backup_create') }}">
-          <button type="submit" class="btn btn-primary">Create Backup Now</button>
+          <button type="submit" class="btn btn-primary">Create Backup</button>
         </form>
       </div>
 
@@ -165,7 +165,7 @@
 
     <!-- Maintenance -->
     <div id="tab-maintenance" class="admin-tab card admin-card hidden">
-      <h3 style="font-weight: 800; font-size: 1.25rem; margin-bottom: 2rem;">System Operations</h3>
+      <h3 style="font-weight: 600; font-size: 1.1rem; margin-bottom: 2rem;">Operations</h3>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
         <div class="card" style="background: rgba(255,255,255,0.02);">
