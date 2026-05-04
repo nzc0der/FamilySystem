@@ -17,7 +17,7 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 3. [ Installation](#installation)
 4. [ First-Run Setup](#first-run-setup)
 5. [ Configuring the systemd Service](#configuring-the-systemd-service)
-6. [ Accessing the Dashboard](#-accessing-the-dashboard)
+6. [ Accessing the Dashboard](#accessing-the-dashboard)
 7. [ Backup & Recovery](#backup--recovery)
 8. [ Safe Manual Reset](#safe-manual-reset)
 9. [ Troubleshooting](#troubleshooting)
