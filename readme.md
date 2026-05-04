@@ -1,4 +1,4 @@
-# 🏠 Family Dashboard
+#  Family Dashboard
 
 ![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-pink)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
@@ -12,19 +12,19 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 
 ## 📖 Table of Contents
 
-1. [✨ Features](#-features)
-2. [💻 System Requirements](#-system-requirements)
-3. [🚀 Installation](#-installation)
-4. [🛠️ First-Run Setup](#️-first-run-setup)
-5. [🔄 Configuring the systemd Service](#-configuring-the-systemd-service)
-6. [🌐 Accessing the Dashboard](#-accessing-the-dashboard)
-7. [💾 Backup & Recovery](#-backup--recovery)
-8. [🧹 Safe Manual Reset](#-safe-manual-reset)
-9. [❓ Troubleshooting](#-troubleshooting)
+1. [ Features](#-features)
+2. [ System Requirements](#-system-requirements)
+3. [ Installation](#-installation)
+4. [ First-Run Setup](#️-first-run-setup)
+5. [ Configuring the systemd Service](#-configuring-the-systemd-service)
+6. [ Accessing the Dashboard](#-accessing-the-dashboard)
+7. [ Backup & Recovery](#-backup--recovery)
+8. [ Safe Manual Reset](#-safe-manual-reset)
+9. [ Troubleshooting](#-troubleshooting)
 
 ---
 
-## ✨ Features
+##  Features
 
 - **Bento-style UI**: A modern, responsive dashboard layout.
 - **Shared Calendar**: Keep track of family events and appointments.
@@ -35,7 +35,7 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 
 ---
 
-## 💻 System Requirements
+##  System Requirements
 
 | Requirement         | Version / Notes                               |
 |---------------------|-----------------------------------------------|
@@ -47,7 +47,7 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 
 ---
 
-## 🚀 Installation
+## Installation
 
 1. **Clone the repository**:
    ```bash
@@ -63,7 +63,7 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 
 ---
 
-## 🛠️ First-Run Setup
+##  First-Run Setup
 
 After running the setup script, you will need to configure your admin user and basic settings.
 1. Run the server: `python3 server.py`
@@ -72,7 +72,7 @@ After running the setup script, you will need to configure your admin user and b
 
 ---
 
-## 🔄 Configuring the systemd Service
+##  Configuring the systemd Service
 
 To ensure the dashboard starts automatically when your Pi boots:
 
@@ -89,7 +89,7 @@ To ensure the dashboard starts automatically when your Pi boots:
 
 ---
 
-## 🌐 Accessing the Dashboard
+##  Accessing the Dashboard
 
 Once running, access the dashboard from any device on your local network:
 - **URL**: `http://<your-pi-ip>:5000`
@@ -97,7 +97,7 @@ Once running, access the dashboard from any device on your local network:
 
 ---
 
-## 💾 Backup & Recovery
+##  Backup & Recovery
 
 The dashboard includes an automated backup system. Backups are stored in the `backups/` directory.
 
@@ -106,7 +106,7 @@ The dashboard includes an automated backup system. Backups are stored in the `ba
 
 ---
 
-## 🧹 Safe Manual Reset
+##  Safe Manual Reset
 
 If you need to wipe the system and start fresh:
 ```bash
@@ -116,7 +116,7 @@ python3 reset_system.py
 
 ---
 
-## ❓ Troubleshooting
+##  Troubleshooting
 
 - **Port already in use**: Check if another instance is running or change the port in `config.json`.
 - **Permission Denied**: Ensure you have read/write permissions in the project folder.
@@ -124,6 +124,6 @@ python3 reset_system.py
 
 ---
 
-## 📜 License
+##  License
 
 Distributed under the MIT License. See `LICENSE` for more information.
