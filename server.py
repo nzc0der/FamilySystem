@@ -241,6 +241,7 @@ def _register_routes(app: Flask) -> None:
         bookmarks = settings.get_bookmarks()
         events = settings.get_events()
         all_users = settings.get_users()
+        meal_plan = settings.get_meal_plan()
         return render_template(
             "dashboard.html",
             todos=todos,
@@ -249,6 +250,8 @@ def _register_routes(app: Flask) -> None:
             bookmarks=bookmarks,
             events=events,
             all_users=all_users,
+            meal_plan=meal_plan,
+            now=datetime.now()
         )
 
     # --- To-dos ---
@@ -310,7 +313,7 @@ def _register_routes(app: Flask) -> None:
         if not title and not content:
             flash("Note must have a title or content.", "warning")
         else:
-            settings.upsert_note(session["user_id"], note_id, title, content)
+            settings.upsert_note(session["user_id"], note_id, title, content, is_admin=(session.get("role") == "admin"))
         return redirect(url_for("notes_list"))
 
     @app.route("/notes/delete/<int:note_id>", methods=["POST"])
@@ -450,24 +453,36 @@ def _register_routes(app: Flask) -> None:
     @app.route("/shopping/delete/<int:item_id>", methods=["POST"])
     @login_required
     def shopping_delete(item_id: int):
-        # Admin can always delete
-        if session.get("role") != "admin" and session.get("shopping_permission") in ("read", "add"):
-            flash("You do not have permission to remove shopping items.", "danger")
+        item = settings.get_shopping_item(item_id)
+        if not item:
+            flash("Shopping item not found.", "warning")
+            return redirect(url_for("shopping"))
+        
+        # Admin and users with 'full' permission can delete anything
+        # Otherwise, the user can only delete their own item
+        is_admin = session.get("role") == "admin"
+        has_full_perm = session.get("shopping_permission") == "full"
+        is_author = session.get("user_id") == item.get("added_by")
+        
+        if not (is_admin or has_full_perm or is_author):
+            flash("You do not have permission to remove this shopping item.", "danger")
             return redirect(url_for("shopping"))
             
         settings.delete_shopping_item(item_id)
         return redirect(url_for("shopping"))
 
     # ------------------------------------------------------------------
-    # Status Board
+    # Meal Plan
     # ------------------------------------------------------------------
 
-    @app.route("/status/update", methods=["POST"])
+    @app.route("/meals/update", methods=["POST"])
     @login_required
-    def update_status():
-        status = request.form.get("status", "Available").strip()
-        settings.update_user_status(session["user_id"], status)
-        return redirect(url_for("dashboard"))
+    def update_meal():
+        day = request.form.get("day")
+        meal = request.form.get("meal", "").strip()
+        if day:
+            settings.update_meal_plan(day, meal)
+        return redirect(url_for('dashboard'))
 
     # ------------------------------------------------------------------
     # Profile

@@ -3,247 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - FamilyDashboard</title>
+  <title>Login - Family Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <style>
-    :root {
-      --color-bg: #050507;
-      --color-primary: #a78bfa;
-      --color-accent: #f472b6;
-      --color-text: #f9fafb;
-      --color-muted: #9ca3af;
-      --radius: 24px;
-      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: 'Outfit', -apple-system, sans-serif;
-      background: var(--color-bg);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(81, 85, 245, 0.05) 0px, transparent 40%),
-        radial-gradient(at 100% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 40%);
-      color: var(--color-text);
-      min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
+      padding: 1rem;
     }
-
     .login-card {
       width: 100%;
       max-width: 440px;
       padding: 3rem;
-      background: rgba(15, 15, 20, 0.7);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius);
-      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
-      text-align: center;
-      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(40px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    .logo {
-      width: 64px;
-      height: 64px;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-      border-radius: 18px;
-      margin: 0 auto 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 30px rgba(157, 170, 255, 0.3);
-    }
-
-    .logo svg {
-      width: 32px;
-      height: 32px;
-      stroke: #000;
-      stroke-width: 2.5;
-    }
-
-    h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.04em; }
-    p.subtitle { color: var(--color-muted); font-weight: 600; margin-bottom: 2.5rem; font-size: 0.95rem; }
-
-    .form-group { text-align: left; margin-bottom: 1.5rem; }
-    label { display: block; font-size: 0.8rem; font-weight: 800; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; margin-left: 0.5rem; }
-    
-    input, select {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 1rem 1.25rem;
-      color: #fff;
-      font-family: inherit;
-      font-size: 1rem;
-      transition: all var(--transition);
-      outline: none;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--color-primary);
-      background: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.15);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dk, #7c3aed));
-      color: #fff;
-      border: none;
-      border-radius: 16px;
-      font-weight: 800;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all var(--transition);
-      margin-top: 1rem;
-      box-shadow: 0 10px 25px rgba(167, 139, 250, 0.3);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 35px rgba(167, 139, 250, 0.4);
-      filter: brightness(1.1);
-    }
-
-    .flash {
-      padding: 1rem;
-      background: rgba(248, 113, 113, 0.1);
-      border: 1px solid rgba(248, 113, 113, 0.2);
-      border-radius: 14px;
-      color: #f87171;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-    }
-
-    /* Profile Selector */
-    .profile-grid {
+    .user-select-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
-
-    .profile-item {
+    .user-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
       cursor: pointer;
-      transition: all var(--transition);
+      padding: 1rem 0.5rem;
+      border-radius: 12px;
+      transition: var(--transition-smooth);
+      background: hsla(0,0%,100%,0.02);
+      border: 1px solid var(--border-color);
     }
-
-    .profile-avatar {
-      width: 60px;
-      height: 60px;
+    .user-option:hover, .user-option.selected {
+      background: hsla(260, 90%, 70%, 0.1);
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+    .user-avatar {
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.05);
-      border: 2px solid transparent;
-      margin: 0 auto 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      color: var(--color-muted);
       font-size: 1.2rem;
+      color: white;
     }
-
-    .profile-item:hover .profile-avatar {
-      background: rgba(255,255,255,0.1);
-      transform: scale(1.05);
+    .user-name {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: capitalize;
     }
-
-    .profile-item.selected .profile-avatar {
-      border-color: var(--color-primary);
-      background: rgba(167, 139, 250, 0.15);
-      color: var(--color-primary);
-      box-shadow: 0 0 20px rgba(167, 139, 250, 0.2);
-    }
-
-    .profile-name { font-size: 0.75rem; font-weight: 700; color: var(--color-muted); }
-    .profile-item.selected .profile-name { color: var(--color-text); }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+  <div class="login-card glass-panel">
+    <div style="text-align: center; margin-bottom: 3rem;">
+      <div class="brand-icon" style="width: 54px; height: 54px; margin: 0 auto 1.5rem;">
+        <i class="fas fa-house-chimney" style="color: white; font-size: 1.8rem;"></i>
+      </div>
+      <h1 style="font-size: 2.2rem; margin-bottom: 0.5rem;">Welcome Back</h1>
+      <p style="color: var(--text-muted); font-weight: 500;">Select your profile to continue</p>
     </div>
-    <h1>Family</h1>
-    <p class="subtitle">Select your profile to continue</p>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        {% for msg in messages %}
-          <div class="flash">{{ msg }}</div>
-        {% endfor %}
-      {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="flash flash-{{ category }}" style="margin-bottom: 1.5rem; font-size: 0.9rem; padding: 0.8rem 1rem; border-radius: 10px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
     {% endwith %}
 
     <form method="POST" action="{{ url_for('login') }}">
-      <div class="profile-grid">
-        {% for u in users %}
-        <div class="profile-item" onclick="selectUser('{{ u.username }}', this)">
-          <div class="profile-avatar">{{ u.username[0]|upper }}</div>
-          <div class="profile-name">{{ u.username|capitalize }}</div>
-        </div>
-        {% endfor %}
-        <div class="profile-item" onclick="selectUser('guest', this)">
-          <div class="profile-avatar" style="background: rgba(255,255,255,0.03); border: 1px dashed var(--color-border);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          </div>
-          <div class="profile-name">Guest</div>
-        </div>
-      </div>
-
       <input type="hidden" name="username" id="selected-username" required>
       
-      <div class="form-group" id="password-group" style="display: none; margin-top: 1rem; animation: slideUp 0.4s ease;">
-        <label id="password-label">Password</label>
-        <input type="password" name="password" id="password-input" placeholder="••••••••">
+      <div class="user-select-grid">
+        {% for user in users %}
+        <div class="user-option" onclick="selectUser('{{ user.username }}', this)">
+          <div class="user-avatar">{{ user.username[0]|upper }}</div>
+          <span class="user-name">{{ user.username }}</span>
+        </div>
+        {% endfor %}
+        <div class="user-option" onclick="selectUser('guest', this)">
+          <div class="user-avatar" style="background: hsla(0,0%,100%,0.1);"><i class="fas fa-user-secret" style="font-size: 1rem;"></i></div>
+          <span class="user-name">Guest</span>
+        </div>
       </div>
 
-      <button type="submit" class="btn" id="login-btn" style="display: none;">Access Dashboard</button>
+      <div id="password-field" style="display: none; margin-bottom: 2rem;">
+        <label style="display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-dim); margin-bottom: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;">Password</label>
+        <div style="position: relative;">
+          <i class="fas fa-lock" style="position: absolute; left: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--text-dim);"></i>
+          <input type="password" name="password" id="password-input" placeholder="Enter your password" style="padding-left: 3rem;">
+        </div>
+      </div>
+
+      <button type="submit" id="login-button" class="btn btn-primary" style="width: 100%; height: 54px; font-size: 1.1rem; opacity: 0.5; pointer-events: none;">
+        Access Dashboard
+      </button>
     </form>
-    
-    <div style="margin-top: 2rem; font-size: 0.75rem; color: var(--color-muted); font-weight: 500;">
-      Private Network Access
-    </div>
   </div>
 
   <script>
     function selectUser(username, el) {
       document.getElementById('selected-username').value = username;
       
-      // Update UI
-      document.querySelectorAll('.profile-item').forEach(item => item.classList.remove('selected'));
+      // Toggle UI
+      document.querySelectorAll('.user-option').forEach(opt => opt.classList.remove('selected'));
       el.classList.add('selected');
       
-      const pwdGroup = document.getElementById('password-group');
-      const pwdInput = document.getElementById('password-input');
-      const loginBtn = document.getElementById('login-btn');
+      const passField = document.getElementById('password-field');
+      const passInput = document.getElementById('password-input');
+      const btn = document.getElementById('login-button');
       
       if (username === 'guest') {
-        pwdGroup.style.display = 'none';
-        pwdInput.required = false;
-        loginBtn.style.display = 'block';
-        loginBtn.textContent = 'Enter as Guest';
+        passField.style.display = 'none';
+        passInput.required = false;
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
       } else {
-        pwdGroup.style.display = 'block';
-        pwdInput.required = true;
-        loginBtn.style.display = 'block';
-        loginBtn.textContent = 'Access Dashboard';
-        pwdInput.focus();
+        passField.style.display = 'block';
+        passInput.required = true;
+        passInput.focus();
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'auto';
       }
     }
   </script>

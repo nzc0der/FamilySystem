@@ -1,123 +1,58 @@
-# Contributing
+# Contributing to Family Dashboard
 
-Thank you for considering contributing to this project.
+Thank you for your interest in contributing! We welcome contributions to make this family dashboard even better.
 
-Please read this guide before making changes or submitting pull requests.
+## How to Contribute
 
----
+### 1. Reporting Bugs
+- Check the issues tab to see if the bug has already been reported.
+- If not, create a new issue with a clear title and description.
+- Include steps to reproduce the bug and any relevant logs or screenshots.
 
-## Getting Started
+### 2. Suggesting Enhancements
+- Open an issue to discuss your idea before starting work.
+- Explain the benefit of the enhancement and how it fits the project's goal.
 
-1. Fork the repository.
-2. Clone your fork:
-
-```bash
-git clone https://github.com/nzc0der/FamilySystem.git
-```
-
-3. Move into the project folder:
-
-```bash
-cd your-repo
-```
-
-4. Create a new branch:
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
----
+### 3. Submitting Pull Requests
+1. **Fork** the repository.
+2. **Clone** your fork to your local machine (or Raspberry Pi).
+3. **Create a branch** for your changes:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+4. **Make your changes**. Ensure you follow the project's coding style (Python PEP 8 for backend, clean HTML/CSS/JS for frontend).
+5. **Test your changes** thoroughly.
+6. **Commit** your changes with descriptive messages:
+   ```bash
+   git commit -m "feat: add weather widget support"
+   ```
+7. **Push** to your fork and **open a Pull Request** against the main repository.
 
 ## Development Setup
 
-Set up the project locally before making changes.
+Since this project is designed for Raspberry Pi, you can develop on the Pi itself or on a computer with Python 3.11+.
 
-Example:
-
-```bash
-npm install
-npm start
-```
-
-For Godot projects:
-
-1. Open the project in Godot.
-2. Run the project using the Play button.
-
----
+1. **Create a Virtual Environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+2. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Run the Dashboard**:
+   ```bash
+   python3 server.py
+   ```
 
 ## Code Style
-
-- Keep code readable and well-structured.
-- Follow the existing formatting and naming conventions.
-- Use descriptive variable, function, and file names.
-- Add comments only when necessary to explain non-obvious logic.
-
----
-
-## Commit Messages
-
-Use clear commit messages.
-
-Examples:
-
-```text
-feat: add enemy movement
-fix: resolve collision bug
-docs: update README
-refactor: simplify player controller
-```
-
----
-
-## Pull Requests
-
-Before submitting a pull request:
-
-- Test your changes.
-- Make sure your code does not break existing functionality.
-- Update documentation if needed.
-
-When opening a pull request, include:
-
-- A summary of changes
-- Reason for the change
-- Screenshots or videos if relevant
-
----
-
-## Reporting Issues
-
-When creating an issue, include:
-
-- A clear title
-- Description of the problem
-- Steps to reproduce
-- Expected behaviour
-- Actual behaviour
-- Screenshots or logs if available
-
----
-
-## Feature Requests
-
-Feature requests should include:
-
-- A clear explanation of the idea
-- Why it would improve the project
-- Optional implementation suggestions
-
----
+- **Python**: Follow PEP 8 guidelines.
+- **Frontend**: Use semantic HTML and keep CSS organized.
+- **Documentation**: Update the README if you add new features or change setup steps.
 
 ## Code of Conduct
-
-Be respectful and constructive.
-
-Harassment, discrimination, spam, or intentionally disruptive behaviour is not allowed.
-
----
+Please be respectful and constructive in all interactions within this project.
 
 ## License
-
-By contributing, you agree that your contributions will be licensed under the same license as this project.
+By contributing, you agree that your contributions will be licensed under the MIT License.

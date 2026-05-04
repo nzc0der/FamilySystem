@@ -480,7 +480,7 @@ def get_notes() -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def upsert_note(user_id: int, note_id: Optional[int], title: str, content: str) -> int:
+def upsert_note(user_id: int, note_id: Optional[int], title: str, content: str, is_admin: bool = False) -> int:
     """
     Insert a new note or update an existing one.
 
@@ -494,14 +494,24 @@ def upsert_note(user_id: int, note_id: Optional[int], title: str, content: str) 
             )
             return cur.lastrowid
         else:
-            conn.execute(
-                """
-                UPDATE notes
-                   SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
-                 WHERE id = ? AND user_id = ?
-                """,
-                (title.strip(), content.strip(), note_id, user_id),
-            )
+            if is_admin:
+                conn.execute(
+                    """
+                    UPDATE notes
+                       SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
+                     WHERE id = ?
+                    """,
+                    (title.strip(), content.strip(), note_id),
+                )
+            else:
+                conn.execute(
+                    """
+                    UPDATE notes
+                       SET title = ?, content = ?, updated_at = CURRENT_TIMESTAMP
+                     WHERE id = ? AND user_id = ?
+                    """,
+                    (title.strip(), content.strip(), note_id, user_id),
+                )
             return note_id
 
 
@@ -672,6 +682,15 @@ def get_shopping_items() -> list[dict]:
             """
         ).fetchall()
     return [dict(r) for r in rows]
+
+def get_shopping_item(item_id: int) -> dict | None:
+    """Return a single shopping list item."""
+    with _get_db() as conn:
+        row = conn.execute(
+            "SELECT * FROM shopping_items WHERE id = ?",
+            (item_id,)
+        ).fetchone()
+    return dict(row) if row else None
 
 def add_shopping_item(item_name: str, added_by: int) -> int:
     """Insert a new shopping item."""
