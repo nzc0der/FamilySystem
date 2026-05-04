@@ -12,7 +12,7 @@ Please read this guide before making changes or submitting pull requests.
 2. Clone your fork:
 
 ```bash
-git clone https://github.com/your-username/your-repo.git
+git clone https://github.com/nzc0der/FamilySystem.git
 ```
 
 3. Move into the project folder:
