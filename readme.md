@@ -10,7 +10,7 @@ A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organ
 
 ---
 
-## 📖 Table of Contents
+## Table of Contents
 
 1. [ Features](#features)
 2. [ System Requirements](#system-requirements)
