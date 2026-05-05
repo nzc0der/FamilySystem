@@ -2,7 +2,7 @@
 
 ![Platform](https://img.shields.io/badge/platform-Raspberry%20Pi-pink)
 ![Python](https://img.shields.io/badge/python-3.11+-blue)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey)](https://github.com/nzc0der/FamilySystem/blob/main/LICENSE)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Maintenance](https://img.shields.io/badge/maintained-yes-brightgreen)
 [![HTML5](https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
