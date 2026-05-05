@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 ![Status](https://img.shields.io/badge/status-active-success)
 ![Maintenance](https://img.shields.io/badge/maintained-yes-brightgreen)
+[![HTML5](https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 
 A premium, self-hosted family dashboard designed to run on a Raspberry Pi. Organise your family life with task management, shopping lists, shared calendars, and more—all in one beautiful, private interface.
 
